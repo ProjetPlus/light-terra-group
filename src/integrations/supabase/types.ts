@@ -494,7 +494,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      increment_news_view: { Args: { _slug: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
