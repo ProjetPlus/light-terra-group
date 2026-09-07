@@ -1,13 +1,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Phone, Mail, MapPin, X } from "lucide-react";
+import { Menu, Phone, Mail, MapPin, MessageCircle, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-import logoAsset from "@/assets/logo-light-terra.png.asset.json";
+import { LOGO_URL, WHATSAPP_NUMBERS, DEVELOPER } from "@/lib/media";
 import { companyQuery, partnersQuery } from "@/lib/site-data";
 import { Button } from "@/components/ui/button";
 import { AiAssistant } from "@/components/site/AiAssistant";
-import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/", label: "Accueil" },
@@ -20,34 +19,25 @@ const NAV = [
   { to: "/contact", label: "Contact" },
 ];
 
+/** Hauteur réservée sous le menu fixe. */
+export const HEADER_OFFSET = "pt-[76px] lg:pt-[92px]";
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => setOpen(false), [pathname]);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled ? "bg-ink/95 backdrop-blur-md shadow-elevated" : "bg-gradient-to-b from-ink/80 to-transparent",
-      )}
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 lg:px-8">
-        <Link to="/" className="flex items-center gap-3" aria-label="LIGHT TERRA GROUP — accueil">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-secondary shadow-sm">
+      <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3 lg:px-8">
+        <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="LIGHT TERRA GROUP — accueil">
           <img
-            src={logoAsset.url}
+            src={LOGO_URL}
             alt="Logo LIGHT TERRA GROUP"
-            className="h-11 w-auto lg:h-14"
-            width={1536}
-            height={1024}
+            className="h-12 w-auto shrink-0 lg:h-16"
+            width={600}
+            height={400}
           />
         </Link>
 
@@ -56,8 +46,8 @@ export function SiteHeader() {
             <Link
               key={item.to}
               to={item.to}
-              className="text-[0.82rem] font-medium uppercase tracking-[0.12em] text-ink-foreground/75 transition-colors hover:text-gold"
-              activeProps={{ className: "text-gold" }}
+              className="text-[0.82rem] font-semibold uppercase tracking-[0.12em] text-foreground/70 transition-colors hover:text-gold-deep"
+              activeProps={{ className: "text-gold-deep" }}
               activeOptions={{ exact: item.to === "/" }}
             >
               {item.label}
@@ -65,14 +55,14 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button asChild variant="gold" size="sm" className="hidden sm:inline-flex">
             <Link to="/services">Demander un devis</Link>
           </Button>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold/40 text-gold xl:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold/50 text-gold-deep xl:hidden"
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={open}
           >
@@ -82,20 +72,20 @@ export function SiteHeader() {
       </div>
 
       {open ? (
-        <div className="border-t border-gold/20 bg-ink/98 backdrop-blur-md xl:hidden">
+        <div className="max-h-[70vh] overflow-y-auto border-t border-border bg-secondary xl:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col px-5 py-3">
             {NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className="border-b border-white/5 py-3 text-sm uppercase tracking-[0.14em] text-ink-foreground/80"
-                activeProps={{ className: "text-gold" }}
+                className="border-b border-border py-3 text-sm uppercase tracking-[0.14em] text-foreground/80"
+                activeProps={{ className: "text-gold-deep" }}
                 activeOptions={{ exact: item.to === "/" }}
               >
                 {item.label}
               </Link>
             ))}
-            <Button asChild variant="gold" className="mt-4">
+            <Button asChild variant="gold" className="my-4">
               <Link to="/services">Demander un devis</Link>
             </Button>
           </nav>
@@ -147,14 +137,16 @@ export function SiteFooter() {
     <footer className="bg-ink-gradient text-ink-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-4 lg:px-8">
         <div className="lg:col-span-2">
-          <img
-            src={logoAsset.url}
-            alt="Logo LIGHT TERRA GROUP"
-            loading="lazy"
-            className="h-20 w-auto"
-            width={1536}
-            height={1024}
-          />
+          <div className="inline-block rounded-lg bg-secondary p-4 shadow-sm">
+            <img
+              src={LOGO_URL}
+              alt="Logo LIGHT TERRA GROUP"
+              loading="lazy"
+              className="h-20 w-auto"
+              width={600}
+              height={400}
+            />
+          </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-ink-foreground/70">
             {company?.description ??
               "LIGHT TERRA GROUP valorise la terre et transforme les opportunités foncières en projets d'avenir."}
@@ -177,24 +169,28 @@ export function SiteFooter() {
         <div>
           <h3 className="font-display text-lg text-gold">Contact</h3>
           <ul className="mt-4 space-y-3 text-sm text-ink-foreground/70">
-            {company?.phone_primary ? (
-              <li className="flex items-start gap-2">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                <a href={`tel:${company.phone_primary}`}>{company.phone_primary}</a>
+            <li className="flex items-start gap-2">
+              <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              <a href="tel:+2250749224722">+225 07 49 22 47 22</a>
+            </li>
+            {WHATSAPP_NUMBERS.map((w) => (
+              <li key={w.link} className="flex items-start gap-2">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                <a href={`https://wa.me/${w.link}`} target="_blank" rel="noreferrer noopener">
+                  {w.label} : {w.display}
+                </a>
               </li>
-            ) : null}
-            {company?.email ? (
-              <li className="flex items-start gap-2">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                <a href={`mailto:${company.email}`}>{company.email}</a>
-              </li>
-            ) : null}
-            {company?.address || company?.city ? (
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                <span>{[company?.address, company?.city, company?.country].filter(Boolean).join(", ")}</span>
-              </li>
-            ) : null}
+            ))}
+            <li className="flex items-start gap-2">
+              <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              <a href="mailto:contact@lightterragroup.com">contact@lightterragroup.com</a>
+            </li>
+            <li className="flex items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              <span>
+                Siège social : Abidjan Cocody Akouédo extension sud-est, Lot 637, îlot 60 ; 01 BP 2259 Abidjan 01
+              </span>
+            </li>
           </ul>
         </div>
       </div>
@@ -207,6 +203,26 @@ export function SiteFooter() {
           <p className="uppercase tracking-[0.2em] text-gold/80">
             {company?.slogan ?? "Bâtir la terre, éclairer l'avenir"}
           </p>
+        </div>
+        <div className="mx-auto max-w-7xl px-5 pb-6 text-center text-xs text-ink-foreground/50 lg:px-8">
+          Développé par{" "}
+          <a
+            href={DEVELOPER.site}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-gold transition hover:underline"
+          >
+            {DEVELOPER.name}
+          </a>{" "}
+          -{" "}
+          <a
+            href={DEVELOPER.whatsapp}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-gold transition hover:underline"
+          >
+            {DEVELOPER.phone}
+          </a>
         </div>
       </div>
     </footer>
