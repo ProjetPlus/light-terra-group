@@ -229,39 +229,54 @@ export type Database = {
       }
       messages: {
         Row: {
+          admin_reply: string | null
+          budget_range: string | null
           company: string | null
           created_at: string
+          desired_date: string | null
           email: string
           full_name: string
           id: string
           message: string
           phone: string | null
+          project_type: string | null
+          replied_at: string | null
           request_type: string
           status: string
           subject: string | null
           updated_at: string
         }
         Insert: {
+          admin_reply?: string | null
+          budget_range?: string | null
           company?: string | null
           created_at?: string
+          desired_date?: string | null
           email: string
           full_name: string
           id?: string
           message: string
           phone?: string | null
+          project_type?: string | null
+          replied_at?: string | null
           request_type?: string
           status?: string
           subject?: string | null
           updated_at?: string
         }
         Update: {
+          admin_reply?: string | null
+          budget_range?: string | null
           company?: string | null
           created_at?: string
+          desired_date?: string | null
           email?: string
           full_name?: string
           id?: string
           message?: string
           phone?: string | null
+          project_type?: string | null
+          replied_at?: string | null
           request_type?: string
           status?: string
           subject?: string | null
