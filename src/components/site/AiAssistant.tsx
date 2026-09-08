@@ -17,7 +17,7 @@ export function AiAssistant() {
     {
       role: "assistant",
       content:
-        "Bonjour ! Je suis l'assistante virtuelle de LIGHT TERRA GROUP. Posez-moi vos questions sur nos activités, nos projets ou une demande de devis.",
+        "Bonjour, je suis Raï, l'assistante virtuelle de LIGHT TERRA GROUP. Posez-moi vos questions sur nos activités, nos projets ou une demande de devis.",
     },
   ]);
   const listRef = useRef<HTMLDivElement>(null);
@@ -56,7 +56,7 @@ export function AiAssistant() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Fermer l'assistante" : "Discuter avec l'assistante"}
+        aria-label={open ? "Fermer Raï" : "Discuter avec Raï"}
         className="fixed bottom-5 right-5 z-50 inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-gold bg-ink shadow-elevated transition hover:scale-105"
       >
         {open ? (
@@ -64,7 +64,7 @@ export function AiAssistant() {
         ) : (
           <img
             src={ASSISTANT_AVATAR_URL}
-            alt="Assistante virtuelle LIGHT TERRA GROUP"
+            alt="Raï, assistante virtuelle LIGHT TERRA GROUP"
             className="h-full w-full object-cover object-center"
             width={256}
             height={256}
@@ -82,7 +82,7 @@ export function AiAssistant() {
               className="h-10 w-10 shrink-0 rounded-full border border-gold/60 object-cover"
             />
             <div className="min-w-0">
-              <p className="truncate font-display text-base text-gold">Assistante LIGHT TERRA</p>
+              <p className="truncate font-display text-base text-gold">Raï — LIGHT TERRA GROUP</p>
               <p className="text-xs text-ink-foreground/60">Réponses instantanées</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ export function AiAssistant() {
                 {m.content}
               </div>
             ))}
-            {loading ? <p className="text-xs text-muted-foreground">L'assistante écrit…</p> : null}
+            {loading ? <p className="text-xs text-muted-foreground">Raï écrit…</p> : null}
           </div>
           <form
             className="flex items-center gap-2 border-t border-border p-3"
