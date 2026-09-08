@@ -246,3 +246,26 @@ export function formatDateFr(value: string | null | undefined) {
     year: "numeric",
   });
 }
+
+export type MediaItem = {
+  id: string;
+  kind: string;
+  title: string | null;
+  description: string | null;
+  url: string;
+  poster_url: string | null;
+  position: number;
+  is_active: boolean;
+};
+
+export const mediaItemsQuery = queryOptions({
+  queryKey: ["media_items", "public"],
+  queryFn: async (): Promise<MediaItem[]> =>
+    unwrap(
+      await supabase
+        .from("media_items")
+        .select("*")
+        .eq("is_active", true)
+        .order("position", { ascending: true }),
+    ),
+});
