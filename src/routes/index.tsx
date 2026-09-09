@@ -14,6 +14,7 @@ import {
 
 import { PartnersStrip, SiteFooter, SiteHeader } from "@/components/site/SiteLayout";
 import { AiAssistant } from "@/components/site/AiAssistant";
+import { MediaGallery } from "@/components/site/MediaGallery";
 import { Button } from "@/components/ui/button";
 import {
   activitiesQuery,
