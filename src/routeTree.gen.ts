@@ -14,6 +14,7 @@ import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as ActivitesRouteImport } from './routes/activites'
 import { Route as ActualitesRouteImport } from './routes/actualites'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as MeRouteImport } from './routes/me'
 import { Route as ProjetsRouteImport } from './routes/projets'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TemoignagesRouteImport } from './routes/temoignages'
@@ -44,6 +45,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjetsRoute = ProjetsRouteImport.update({
   id: '/projets',
   path: '/projets',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/activites': typeof ActivitesRoute
   '/actualites': typeof ActualitesRoute
   '/contact': typeof ContactRoute
+  '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/activites': typeof ActivitesRoute
   '/actualites': typeof ActualitesRoute
   '/contact': typeof ContactRoute
+  '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/activites': typeof ActivitesRoute
   '/actualites': typeof ActualitesRoute
   '/contact': typeof ContactRoute
+  '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/activites'
     | '/actualites'
     | '/contact'
+    | '/me'
     | '/projets'
     | '/services'
     | '/temoignages'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/activites'
     | '/actualites'
     | '/contact'
+    | '/me'
     | '/projets'
     | '/services'
     | '/temoignages'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/activites'
     | '/actualites'
     | '/contact'
+    | '/me'
     | '/projets'
     | '/services'
     | '/temoignages'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   ActivitesRoute: typeof ActivitesRoute
   ActualitesRoute: typeof ActualitesRoute
   ContactRoute: typeof ContactRoute
+  MeRoute: typeof MeRoute
   ProjetsRoute: typeof ProjetsRoute
   ServicesRoute: typeof ServicesRoute
   TemoignagesRoute: typeof TemoignagesRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projets': {
       id: '/projets'
       path: '/projets'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActivitesRoute: ActivitesRoute,
   ActualitesRoute: ActualitesRoute,
   ContactRoute: ContactRoute,
+  MeRoute: MeRoute,
   ProjetsRoute: ProjetsRoute,
   ServicesRoute: ServicesRoute,
   TemoignagesRoute: TemoignagesRoute,
