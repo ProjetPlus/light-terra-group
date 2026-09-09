@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as ActivitesRouteImport } from './routes/activites'
 import { Route as ActualitesRouteImport } from './routes/actualites'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as ProjetsRouteImport } from './routes/projets'
@@ -38,6 +39,11 @@ const ActivitesRoute = ActivitesRouteImport.update({
 const ActualitesRoute = ActualitesRouteImport.update({
   id: '/actualites',
   path: '/actualites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/a-propos': typeof AProposRoute
   '/activites': typeof ActivitesRoute
   '/actualites': typeof ActualitesRoute
+  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/a-propos': typeof AProposRoute
   '/activites': typeof ActivitesRoute
   '/actualites': typeof ActualitesRoute
+  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/a-propos': typeof AProposRoute
   '/activites': typeof ActivitesRoute
   '/actualites': typeof ActualitesRoute
+  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/a-propos'
     | '/activites'
     | '/actualites'
+    | '/admin'
     | '/contact'
     | '/me'
     | '/projets'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/a-propos'
     | '/activites'
     | '/actualites'
+    | '/admin'
     | '/contact'
     | '/me'
     | '/projets'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/a-propos'
     | '/activites'
     | '/actualites'
+    | '/admin'
     | '/contact'
     | '/me'
     | '/projets'
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   AProposRoute: typeof AProposRoute
   ActivitesRoute: typeof ActivitesRoute
   ActualitesRoute: typeof ActualitesRoute
+  AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
   MeRoute: typeof MeRoute
   ProjetsRoute: typeof ProjetsRoute
@@ -188,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/actualites'
       fullPath: '/actualites'
       preLoaderRoute: typeof ActualitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -240,6 +260,7 @@ const rootRouteChildren: RootRouteChildren = {
   AProposRoute: AProposRoute,
   ActivitesRoute: ActivitesRoute,
   ActualitesRoute: ActualitesRoute,
+  AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
   MeRoute: MeRoute,
   ProjetsRoute: ProjetsRoute,
