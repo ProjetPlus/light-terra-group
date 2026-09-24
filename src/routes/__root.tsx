@@ -127,12 +127,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const company = Route.useLoaderData();
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: OG_IMAGE_URL,
+    logo: company?.logo_url || OG_IMAGE_URL,
     description: SITE_DESCRIPTION,
     telephone: "+225 07 49 22 47 22",
     email: "contact@lightterragroup.com",
