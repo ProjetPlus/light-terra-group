@@ -161,7 +161,7 @@ function IntroVideoLoop() {
           className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out " + (slot === front ? "opacity-100" : "opacity-0")}
           muted
           playsInline
-          preload="auto"
+          preload={slot === front ? "auto" : "metadata"}
           aria-hidden={slot !== front}
         />
       ))}
@@ -292,7 +292,7 @@ function VideoShowcase() {
                     playsInline
                     autoPlay={i === safeIndex}
                     loop
-                    preload={i === safeIndex ? "auto" : "metadata"}
+                    preload={i === safeIndex ? "auto" : "none"}
                     aria-hidden={i !== safeIndex}
                   />
                 ))
