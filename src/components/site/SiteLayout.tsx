@@ -33,7 +33,7 @@ export function SiteHeader() {
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3 lg:px-8">
         <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="LIGHT TERRA GROUP — accueil">
           <img
-            src={LOGO_URL}
+            src={company?.logo_url || LOGO_URL}
             alt="Logo LIGHT TERRA GROUP"
             className="h-12 w-auto shrink-0 lg:h-16"
             width={600}
