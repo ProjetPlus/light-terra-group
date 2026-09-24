@@ -42,7 +42,7 @@ type FieldDef = {
 type TableDef = {
   key: string;
   label: string;
-  table: "news" | "projects" | "testimonials" | "partners" | "media_items";
+  table: "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos";
   order: { column: string; ascending: boolean };
   columns: string[];
   fields: FieldDef[];
@@ -50,6 +50,18 @@ type TableDef = {
 };
 
 const TABLES: TableDef[] = [
+  {
+    key: "intro_videos", label: "Vidéo d'accueil", table: "intro_videos",
+    order: { column: "position", ascending: true },
+    columns: ["label", "position", "is_active"], create: true,
+    fields: [
+      { name: "label", label: "Nom", kind: "text", required: true },
+      { name: "video_url", label: "Vidéo", kind: "file", required: true, accept: "video/mp4,video/webm,video/quicktime" },
+      { name: "position", label: "Ordre", kind: "number" },
+      { name: "is_active", label: "Active", kind: "boolean" },
+    ],
+  },
+
   {
     key: "news", label: "Actualités", table: "news",
     order: { column: "created_at", ascending: false },
@@ -152,6 +164,7 @@ function newRowFor(def: TableDef, rows: Row[]) {
   if (def.table === "projects") Object.assign(row, { position: first, status: "en_cours", is_published: false, is_featured: false });
   if (def.table === "partners") Object.assign(row, { position: first, is_active: true });
   if (def.table === "media_items") Object.assign(row, { kind: "photo", position: first, is_active: true });
+  if (def.table === "intro_videos") Object.assign(row, { position: first, is_active: true });
   return row;
 }
 
@@ -192,9 +205,9 @@ function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <aside className={"fixed inset-y-0 left-0 z-50 w-72 border-r border-border bg-ink text-ink-foreground transition-transform lg:translate-x-0 " + (mobileOpen ? "translate-x-0" : "-translate-x-full")}>
-        <div className="flex h-full flex-col">
+    <div className="min-h-screen bg-slate-50/70">
+      <aside className={"fixed inset-y-0 left-0 z-50 w-[280px] border-r border-white/10 bg-[#0b1f18] text-ink-foreground transition-transform lg:translate-x-0 " + (mobileOpen ? "translate-x-0" : "-translate-x-full")}>
+        <div className="flex h-full flex-col shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
             <img src={LOGO_URL} alt="LIGHT TERRA GROUP" className="h-10 w-auto" />
             <button type="button" className="rounded-md p-2 hover:bg-white/10 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
@@ -220,7 +233,7 @@ function AdminPage() {
       {mobileOpen ? <button type="button" className="fixed inset-0 z-40 bg-black/50 lg:hidden" aria-label="Fermer le menu" onClick={() => setMobileOpen(false)} /> : null}
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4 px-5 py-3 lg:px-8">
             <div className="flex items-center gap-3">
               <button type="button" className="rounded-md border border-border p-2 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu">
@@ -234,8 +247,8 @@ function AdminPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-          {tab === "messages" ? <MessagesPanel /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
+        <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-10">
+          {tab === "messages" ? <DashboardOverview /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
         </main>
       </div>
     </div>
@@ -247,7 +260,7 @@ function SidebarItem({ active, onClick, children }: { active: boolean; onClick: 
     <button
       type="button"
       onClick={onClick}
-      className={"flex w-full items-center rounded-md px-3 py-3 text-left text-sm transition " + (active ? "bg-gold text-ink font-semibold" : "text-ink-foreground/75 hover:bg-white/10 hover:text-ink-foreground")}
+      className={"group flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm transition-all " + (active ? "bg-gold text-ink font-semibold shadow-lg shadow-gold/10" : "text-ink-foreground/70 hover:bg-white/8 hover:text-white")}
     >
       {children}
     </button>
@@ -295,6 +308,49 @@ type Message = {
   replied_at: string | null;
   created_at: string;
 };
+
+function DashboardOverview() {
+  const queries = [
+    ["Demandes", "messages"],
+    ["Actualités", "news"],
+    ["Projets", "projects"],
+    ["Photos & vidéos", "media_items"],
+    ["Témoignages", "testimonials"],
+    ["Partenaires", "partners"],
+  ] as const;
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="eyebrow">Vue d'ensemble</p>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight">Bienvenue dans votre espace d'administration</h2>
+        <p className="mt-2 max-w-2xl text-sm text-slate-500">Publiez, organisez et modérez le contenu du site depuis un seul espace. Les fichiers sont téléversés directement, sans copier de liens.</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {queries.map(([label, key]) => <DashboardCard key={key} label={label} table={key} onClick={() => undefined} />)}
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <p className="text-sm font-semibold">Flux de publication</p>
+        <p className="mt-1 text-sm text-slate-500">Les éléments publiés apparaissent automatiquement sur les sections publiques correspondantes.</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">1</p><p className="mt-1 text-sm font-medium">Téléverser</p></div>
+          <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">2</p><p className="mt-1 text-sm font-medium">Activer / publier</p></div>
+          <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">3</p><p className="mt-1 text-sm font-medium">Visible sur le site</p></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function DashboardCard({ label, table }: { label: string; table: string; onClick?: () => void }) {
+  const { data } = useQuery({
+    queryKey: ["admin", "count", table],
+    queryFn: async () => {
+      const { count, error } = await supabase.from(table).select("id", { count: "exact", head: true });
+      if (error) return 0;
+      return count ?? 0;
+    },
+  });
+  return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold tracking-tight">{data ?? "—"}</p><p className="mt-1 text-xs text-slate-400">élément(s)</p></div>;
+}
 
 function MessagesPanel() {
   const qc = useQueryClient();
@@ -432,7 +488,7 @@ function Info({ label, value, href }: { label: string; value: string; href?: str
 function CrudPanel({ def }: { def: TableDef }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Row | null>(null);
-  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);\n  const [statusFilter, setStatusFilter] = useState("tous");
   const queryKey = useMemo(() => ["admin", def.table], [def.table]);
   const { data, isLoading } = useQuery({
     queryKey,
@@ -443,7 +499,7 @@ function CrudPanel({ def }: { def: TableDef }) {
     },
   });
   const { data: activities } = useQuery(activitiesQuery);
-  const rows = data ?? [];
+  const rows = data ?? [];\n  const visibleRows = def.table === "testimonials" && statusFilter !== "tous" ? rows.filter((r) => String(r.status ?? "") === statusFilter) : rows;
   const categoryOptions = (activities ?? []).map((a) => a.title);
 
   const save = useMutation({
@@ -454,7 +510,7 @@ function CrudPanel({ def }: { def: TableDef }) {
       for (const f of def.fields) if (f.required && (payload[f.name] === null || payload[f.name] === undefined || payload[f.name] === "")) throw new Error("Le champ « " + f.label + " » est obligatoire.");
       if ((def.table === "news" || def.table === "projects") && !payload.slug) payload.slug = slugify(String(payload.title ?? ""));
       if (def.table === "news") { payload.author = "LT Group"; if (!payload.published_at) payload.published_at = todayIsoDate(); }
-      if (!id && (def.table === "projects" || def.table === "partners" || def.table === "media_items")) {
+      if (!id && (def.table === "projects" || def.table === "partners" || def.table === "media_items" || def.table === "intro_videos")) {
         const { data: firstRow } = await supabase.from(def.table).select("position").order("position", { ascending: true }).limit(1).maybeSingle();
         payload.position = firstRow?.position == null ? 0 : Number(firstRow.position) - 1;
       }
@@ -478,7 +534,7 @@ function CrudPanel({ def }: { def: TableDef }) {
         {def.create ? <Button variant="gold" size="sm" onClick={() => setEditing(newRowFor(def, rows))}>Ajouter</Button> : null}
       </div>
       {editing ? (
-        <form className="mt-6 grid gap-4 rounded-lg border border-border bg-card p-5 shadow-sm sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(editing); }}>
+        <form className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(editing); }}>
           {def.table === "testimonials" ? <div className="sm:col-span-2 rounded-md bg-muted p-4 text-sm"><p className="font-medium">{String(editing.author_name ?? "")}</p><p className="mt-1 text-muted-foreground">{String(editing.message ?? "")}</p><p className="mt-2 text-xs text-muted-foreground">{String(editing.company ?? "")}</p></div> : null}
           {def.fields.map((f) => (
             <label key={f.name} className={f.kind === "textarea" || f.kind === "file" ? "text-sm sm:col-span-2" : "text-sm"}>
@@ -490,7 +546,7 @@ function CrudPanel({ def }: { def: TableDef }) {
                 <div className="mt-2 rounded-md border border-dashed border-border p-4">
                   <input type="file" accept={f.accept ?? (def.table === "media_items" && editing.kind === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
-                    try { const folder = def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
+                    try { const folder = def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
                     catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
                     finally { setUploading(null); e.currentTarget.value = ""; }
                   }} />
@@ -503,9 +559,9 @@ function CrudPanel({ def }: { def: TableDef }) {
           <div className="flex gap-2 sm:col-span-2"><Button type="submit" variant="gold" disabled={save.isPending || uploading !== null}>{save.isPending ? "Enregistrement…" : "Enregistrer"}</Button><Button type="button" variant="outline" onClick={() => setEditing(null)}>Annuler</Button></div>
         </form>
       ) : null}
-      <div className="mt-6 overflow-x-auto rounded-lg border border-border"><table className="w-full text-left text-sm"><thead className="bg-muted/60"><tr>{def.columns.map((c) => <th key={c} className="px-4 py-3 text-xs uppercase tracking-[0.12em]">{c}</th>)}<th className="px-4 py-3" /></tr></thead><tbody>
-        {rows.map((row) => <tr key={String(row["id"])} className="border-t border-border">{def.columns.map((c) => <td key={c} className="px-4 py-3">{typeof row[c] === "boolean" ? (row[c] ? "Oui" : "Non") : String(row[c] ?? "—")}</td>)}<td className="px-4 py-3 text-right"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
-        {rows.length === 0 ? <tr><td className="px-4 py-6 text-muted-foreground" colSpan={def.columns.length + 1}>Aucun élément.</td></tr> : null}
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full text-left text-sm"><thead className="bg-slate-50"><tr>{def.columns.map((c) => <th key={c} className="px-4 py-3 text-xs uppercase tracking-[0.12em]">{c}</th>)}<th className="px-4 py-3" /></tr></thead><tbody>
+        {visibleRows.map((row) => <tr key={String(row["id"])} className="border-t border-slate-100 hover:bg-slate-50/70">{def.columns.map((c) => <td key={c} className="px-4 py-3">{typeof row[c] === "boolean" ? (row[c] ? "Oui" : "Non") : String(row[c] ?? "—")}</td>)}<td className="px-4 py-3 text-right"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
+        {visibleRows.length === 0 ? <tr><td className="px-4 py-6 text-muted-foreground" colSpan={def.columns.length + 1}>Aucun élément.</td></tr> : null}
       </tbody></table></div>
     </div>
   );
