@@ -42,7 +42,7 @@ type FieldDef = {
 type TableDef = {
   key: string;
   label: string;
-  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info";
+  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge";
   order: { column: string; ascending: boolean };
   columns: string[];
   fields: FieldDef[];
@@ -101,6 +101,17 @@ const TABLES: TableDef[] = [
       { name: "facebook_url", label: "Facebook", kind: "text" },
       { name: "linkedin_url", label: "LinkedIn", kind: "text" },
       { name: "instagram_url", label: "Instagram", kind: "text" },
+    ],
+  },
+  {
+    key: "ai_knowledge", label: "Raï — base de connaissances", table: "ai_knowledge",
+    order: { column: "position", ascending: true },
+    columns: ["question", "answer", "is_active"], create: true,
+    fields: [
+      { name: "question", label: "Question", kind: "text", required: true },
+      { name: "answer", label: "Réponse", kind: "textarea", required: true },
+      { name: "position", label: "Ordre", kind: "number" },
+      { name: "is_active", label: "Actif", kind: "boolean" },
     ],
   },
   {
@@ -218,6 +229,10 @@ function newRowFor(def: TableDef, rows: Row[]) {
   if (def.table === "partners") Object.assign(row, { position: first, is_active: true });
   if (def.table === "media_items") Object.assign(row, { kind: "photo", position: first, is_active: true });
   if (def.table === "intro_videos") Object.assign(row, { position: first, is_active: true });
+  if (def.table === "hero_slides") Object.assign(row, { position: first, duration_ms: 6000, is_active: true });
+  if (def.table === "activities") Object.assign(row, { position: first, is_active: true });
+  if (def.table === "ai_knowledge") Object.assign(row, { position: first, is_active: true });
+  if (def.table === "company_info") Object.assign(row, { name: "LIGHT TERRA GROUP", slogan: "Bâtir la terre, éclairer l’avenir" });
   return row;
 }
 
@@ -301,7 +316,7 @@ function AdminPage() {
         </header>
 
         <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-10">
-          {tab === "messages" ? <DashboardOverview /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
+          {tab === "messages" ? <DashboardOverview onSelect={selectTab} /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
         </main>
       </div>
     </div>
@@ -379,7 +394,7 @@ function DashboardOverview() {
         <p className="mt-2 max-w-2xl text-sm text-slate-500">Publiez, organisez et modérez le contenu du site depuis un seul espace. Les fichiers sont téléversés directement, sans copier de liens.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {queries.map(([label, key]) => <DashboardCard key={key} label={label} table={key} onClick={() => undefined} />)}
+        {queries.map(([label, key]) => <DashboardCard key={key} label={label} table={key} onClick={() => onSelect(key)} />)}
       </div>
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-sm font-semibold">Flux de publication</p>
@@ -393,7 +408,7 @@ function DashboardOverview() {
     </div>
   );
 }
-function DashboardCard({ label, table }: { label: string; table: string; onClick?: () => void }) {
+function DashboardCard({ label, table, onClick }: { label: string; table: string; onClick?: () => void }) {
   const { data } = useQuery({
     queryKey: ["admin", "count", table],
     queryFn: async () => {
@@ -402,7 +417,7 @@ function DashboardCard({ label, table }: { label: string; table: string; onClick
       return count ?? 0;
     },
   });
-  return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold tracking-tight">{data ?? "—"}</p><p className="mt-1 text-xs text-slate-400">élément(s)</p></div>;
+  return <button type="button" onClick={onClick} className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gold"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold tracking-tight">{data ?? "—"}</p><p className="mt-1 text-xs text-slate-400">élément(s) — ouvrir</p></button>;
 }
 
 function MessagesPanel() {
