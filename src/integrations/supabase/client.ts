@@ -27,20 +27,18 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
-
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  // Production fallback: the Supabase project URL and publishable key are
-  // intentionally safe to expose in the browser. Environment variables still
-  // take precedence when configured on the deployment platform.
+  // Client-side builds use Vite env values. SSR may use process.env.
+  // The publishable key is safe for browser use; the fallback keeps the
+  // public site connected even when Vercel has not injected VITE_* variables.
+  const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
   const SUPABASE_URL =
     import.meta.env['VITE_SUPABASE_URL'] ||
-    process.env['SUPABASE_URL'] ||
-    'https://ghkijyimotuivykvwlge.supabase.co';
+    serverEnv?.['SUPABASE_URL'] ||
+    'https://ghkijyimotuivkvwlge.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY =
     import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ||
-    process.env['SUPABASE_PUBLISHABLE_KEY'] ||
+    serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] ||
     'sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj';
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -65,4 +63,3 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     return Reflect.get(_supabase, prop, receiver);
   },
 });
-
