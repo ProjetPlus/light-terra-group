@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -160,6 +160,7 @@ function AdminPage() {
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const [tab, setTab] = useState("messages");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -170,12 +171,7 @@ function AdminPage() {
         void navigate({ to: "/me" });
         return;
       }
-      const { data: role } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
       if (!role) {
         toast.error("Accès réservé aux administrateurs.");
         await supabase.auth.signOut();
@@ -185,64 +181,76 @@ function AdminPage() {
       setEmail(data.user.email ?? null);
       setReady(true);
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [navigate]);
 
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        Chargement…
-      </div>
-    );
-  }
+  if (!ready) return <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Chargement…</div>;
+
+  const selectTab = (value: string) => {
+    setTab(value);
+    setMobileOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-secondary">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-3 lg:px-8">
-          <div className="flex items-center gap-3">
+      <aside className={"fixed inset-y-0 left-0 z-50 w-72 border-r border-border bg-ink text-ink-foreground transition-transform lg:translate-x-0 " + (mobileOpen ? "translate-x-0" : "-translate-x-full")}>
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
             <img src={LOGO_URL} alt="LIGHT TERRA GROUP" className="h-10 w-auto" />
-            <span className="font-display text-lg">Tableau de bord</span>
+            <button type="button" className="rounded-md p-2 hover:bg-white/10 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span>{email}</span>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                void navigate({ to: "/me" });
-              }}
-            >
+          <div className="px-5 py-4">
+            <p className="text-xs uppercase tracking-[0.16em] text-gold">Administration</p>
+            <p className="mt-1 truncate text-xs text-ink-foreground/60">{email}</p>
+          </div>
+          <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-5">
+            <SidebarItem active={tab === "messages"} onClick={() => selectTab("messages")}>Demandes</SidebarItem>
+            {TABLES.map((t) => <SidebarItem key={t.key} active={tab === t.key} onClick={() => selectTab(t.key)}>{t.label}</SidebarItem>)}
+          </nav>
+          <div className="border-t border-white/10 p-4">
+            <Button variant="outline" className="w-full border-white/20 bg-transparent text-ink-foreground hover:bg-white/10" onClick={async () => { await supabase.auth.signOut(); void navigate({ to: "/me" }); }}>
               Déconnexion
             </Button>
           </div>
         </div>
-      </header>
+      </aside>
 
-      <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-        <div className="flex flex-wrap gap-2">
-          <TabButton active={tab === "messages"} onClick={() => setTab("messages")}>
-            Demandes
-          </TabButton>
-          {TABLES.map((t) => (
-            <TabButton key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
-              {t.label}
-            </TabButton>
-          ))}
-        </div>
+      {mobileOpen ? <button type="button" className="fixed inset-0 z-40 bg-black/50 lg:hidden" aria-label="Fermer le menu" onClick={() => setMobileOpen(false)} /> : null}
 
-        <div className="mt-8">
-          {tab === "messages" ? (
-            <MessagesPanel />
-          ) : (
-            <CrudPanel def={TABLES.find((t) => t.key === tab)!} />
-          )}
-        </div>
+      <div className="lg:pl-72">
+        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+          <div className="flex items-center justify-between gap-4 px-5 py-3 lg:px-8">
+            <div className="flex items-center gap-3">
+              <button type="button" className="rounded-md border border-border p-2 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu">
+                <Menu className="h-5 w-5" />
+              </button>
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">LIGHT TERRA GROUP</p>
+                <h1 className="text-lg">{TABLES.find((t) => t.key === tab)?.label ?? "Demandes"}</h1>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+          {tab === "messages" ? <MessagesPanel /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
+        </main>
       </div>
     </div>
+  );
+}
+
+function SidebarItem({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={"flex w-full items-center rounded-md px-3 py-3 text-left text-sm transition " + (active ? "bg-gold text-ink font-semibold" : "text-ink-foreground/75 hover:bg-white/10 hover:text-ink-foreground")}
+    >
+      {children}
+    </button>
   );
 }
 
