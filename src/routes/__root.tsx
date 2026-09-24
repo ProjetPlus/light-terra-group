@@ -81,7 +81,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: ({ context }) => context.queryClient.ensureQueryData(companyQuery),
+  loader: async ({ context }) => {
+    try {
+      return await context.queryClient.ensureQueryData(companyQuery);
+    } catch {
+      return null;
+    }
+  },
   head: ({ loaderData }) => {
     const configuredLogo = loaderData?.logo_url || LOGO_URL;
     const configuredLogoAbsolute = configuredLogo.startsWith("http") ? configuredLogo : new URL(configuredLogo, SITE_URL).toString();
