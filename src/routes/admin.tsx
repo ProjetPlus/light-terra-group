@@ -101,6 +101,7 @@ const TABLES: TableDef[] = [
       { name: "facebook_url", label: "Facebook", kind: "text" },
       { name: "linkedin_url", label: "LinkedIn", kind: "text" },
       { name: "instagram_url", label: "Instagram", kind: "text" },
+      { name: "logo_url", label: "Logo officiel du groupe", kind: "file", accept: "image/png,image/jpeg,image/webp,image/svg+xml" },
     ],
   },
   {
@@ -652,7 +653,7 @@ function CrudPanel({ def }: { def: TableDef }) {
                 <div className="mt-2 rounded-md border border-dashed border-border p-4">
                   <input type="file" accept={f.accept ?? (def.table === "media_items" && editing["kind"] === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
-                    try { const folder = def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
+                    try { const folder = def.table === "company_info" ? "brand" : def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
                     catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
                     finally { setUploading(null); e.currentTarget.value = ""; }
                   }} />
