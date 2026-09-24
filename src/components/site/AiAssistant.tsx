@@ -39,7 +39,7 @@ export function AiAssistant() {
       });
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: res.ok ? res.reply : res.message },
+        { role: "assistant", content: res.reply },
       ]);
     } catch {
       setMessages((prev) => [
