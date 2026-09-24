@@ -13,7 +13,7 @@ const schema = z.object({
 
 type KnowledgeRow = { question: string; answer: string; is_active: boolean; position: number };
 type SiteContext = {
-  company: Record<string, any> | null;
+  company: Record<string, unknown> | null;
   activities: Array<{ title: string; short_description: string | null }>;
   knowledge: KnowledgeRow[];
   projects: Array<{ title: string; summary: string | null; location: string | null }>;
@@ -21,8 +21,7 @@ type SiteContext = {
 };
 
 function localReply(question: string, ctx: SiteContext) {
-  const q = question.toLowerCase();
-  const normalize = (value: string) =>
+    const normalize = (value: string) =>
     value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const nq = normalize(question);
@@ -93,7 +92,7 @@ export const askAssistant = createServerFn({ method: "POST" })
         client.from("news").select("title,excerpt,published_at").eq("is_published", true).order("published_at", { ascending: false }).limit(8),
       ]);
       ctx = {
-        company: info.data as Record<string, any> | null,
+        company: info.data as Record<string, unknown> | null,
         activities: (activities.data ?? []) as SiteContext["activities"],
         knowledge: (kb.data ?? []) as KnowledgeRow[],
         projects: (projects.data ?? []) as SiteContext["projects"],
