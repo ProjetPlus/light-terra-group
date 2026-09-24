@@ -3,11 +3,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { FileImage, FileVideo, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LOGO_URL } from "@/lib/media";
-import { formatDateFr } from "@/lib/site-data";
+import { activitiesQuery, formatDateFr } from "@/lib/site-data";
 import { replyToMessage } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -28,13 +29,14 @@ export const Route = createFileRoute("/admin")({
 
 type Row = Record<string, unknown>;
 
-type FieldKind = "text" | "textarea" | "number" | "boolean" | "select";
+type FieldKind = "text" | "textarea" | "number" | "boolean" | "select" | "file";
 type FieldDef = {
   name: string;
   label: string;
   kind: FieldKind;
   options?: string[];
   required?: boolean;
+  accept?: string;
 };
 
 type TableDef = {
@@ -49,99 +51,69 @@ type TableDef = {
 
 const TABLES: TableDef[] = [
   {
-    key: "news",
-    label: "Actualités",
-    table: "news",
+    key: "news", label: "Actualités", table: "news",
     order: { column: "created_at", ascending: false },
-    columns: ["title", "is_published", "published_at"],
-    create: true,
+    columns: ["title", "author", "published_at", "is_published"], create: true,
     fields: [
       { name: "title", label: "Titre", kind: "text", required: true },
-      { name: "slug", label: "Identifiant (slug)", kind: "text", required: true },
+      { name: "slug", label: "Identifiant", kind: "text", required: true },
       { name: "excerpt", label: "Résumé", kind: "textarea" },
       { name: "content", label: "Contenu", kind: "textarea" },
-      { name: "image_url", label: "Image (URL)", kind: "text" },
+      { name: "image_url", label: "Image de couverture", kind: "file", accept: "image/*" },
       { name: "author", label: "Auteur", kind: "text" },
-      { name: "published_at", label: "Date de publication (AAAA-MM-JJ)", kind: "text" },
+      { name: "published_at", label: "Date de publication", kind: "text" },
       { name: "is_published", label: "Publiée", kind: "boolean" },
     ],
   },
   {
-    key: "projects",
-    label: "Projets",
-    table: "projects",
+    key: "projects", label: "Projets", table: "projects",
     order: { column: "position", ascending: true },
-    columns: ["title", "category", "is_published"],
-    create: true,
+    columns: ["title", "category", "status", "is_published"], create: true,
     fields: [
       { name: "title", label: "Titre", kind: "text", required: true },
-      { name: "slug", label: "Identifiant (slug)", kind: "text", required: true },
+      { name: "slug", label: "Identifiant", kind: "text", required: true },
       { name: "summary", label: "Résumé", kind: "textarea" },
       { name: "content", label: "Description", kind: "textarea" },
-      { name: "image_url", label: "Image (URL)", kind: "text" },
-      { name: "category", label: "Catégorie", kind: "text" },
+      { name: "image_url", label: "Photo", kind: "file", accept: "image/*" },
+      { name: "category", label: "Pôle d'activité", kind: "select" },
       { name: "location", label: "Localisation", kind: "text" },
-      {
-        name: "status",
-        label: "État",
-        kind: "select",
-        options: ["en_cours", "termine", "a_venir"],
-      },
+      { name: "status", label: "État", kind: "select", options: ["en_cours", "termine", "a_venir"] },
       { name: "position", label: "Ordre", kind: "number" },
       { name: "is_featured", label: "Mise en avant", kind: "boolean" },
       { name: "is_published", label: "Publié", kind: "boolean" },
     ],
   },
   {
-    key: "testimonials",
-    label: "Témoignages",
-    table: "testimonials",
+    key: "testimonials", label: "Témoignages", table: "testimonials",
     order: { column: "created_at", ascending: false },
-    columns: ["author_name", "status", "is_published"],
-    create: false,
+    columns: ["author_name", "company", "status", "is_published"], create: false,
     fields: [
-      { name: "author_name", label: "Auteur", kind: "text", required: true },
-      { name: "author_role", label: "Fonction", kind: "text" },
-      { name: "company", label: "Structure", kind: "text" },
-      { name: "message", label: "Message", kind: "textarea", required: true },
-      { name: "rating", label: "Note (1 à 5)", kind: "number" },
-      {
-        name: "status",
-        label: "Statut",
-        kind: "select",
-        options: ["en_attente", "valide", "refuse"],
-      },
-      { name: "is_published", label: "Publié", kind: "boolean" },
+      { name: "status", label: "Modération", kind: "select", options: ["en_attente", "valide", "refuse"] },
+      { name: "is_published", label: "Publier", kind: "boolean" },
     ],
   },
   {
-    key: "partners",
-    label: "Partenaires",
-    table: "partners",
+    key: "partners", label: "Partenaires", table: "partners",
     order: { column: "position", ascending: true },
-    columns: ["name", "is_active"],
-    create: true,
+    columns: ["name", "is_active"], create: true,
     fields: [
       { name: "name", label: "Nom", kind: "text", required: true },
-      { name: "logo_url", label: "Logo (URL)", kind: "text" },
+      { name: "logo_url", label: "Logo", kind: "file", accept: "image/*" },
       { name: "website_url", label: "Site web", kind: "text" },
       { name: "position", label: "Ordre", kind: "number" },
       { name: "is_active", label: "Actif", kind: "boolean" },
     ],
   },
   {
-    key: "media",
-    label: "Photos & vidéos",
-    table: "media_items",
+    key: "media", label: "Photos & vidéos", table: "media_items",
     order: { column: "position", ascending: true },
-    columns: ["title", "kind", "is_active"],
-    create: true,
+    columns: ["title", "kind", "is_active"], create: true,
     fields: [
       { name: "kind", label: "Type", kind: "select", options: ["photo", "video"], required: true },
       { name: "title", label: "Titre", kind: "text" },
       { name: "description", label: "Description", kind: "textarea" },
-      { name: "url", label: "Fichier (URL)", kind: "text", required: true },
-      { name: "poster_url", label: "Image de couverture (vidéo)", kind: "text" },
+      { name: "url", label: "Fichier", kind: "file", required: true },
+      { name: "poster_url", label: "Image de couverture (vidéo)", kind: "file", accept: "image/*" },
       { name: "position", label: "Ordre", kind: "number" },
       { name: "is_active", label: "Actif", kind: "boolean" },
     ],
@@ -150,6 +122,38 @@ const TABLES: TableDef[] = [
 
 const field =
   "mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring";
+
+function slugify(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function todayIsoDate() { return new Date().toISOString().slice(0, 10); }
+
+function safeFileName(name: string) {
+  const ext = name.includes(".") ? "." + name.split(".").pop()!.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
+  const base = name.replace(/\.[^/.]+$/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+  return (base || "fichier") + "-" + crypto.randomUUID() + ext;
+}
+
+async function uploadSiteFile(file: File, folder: string) {
+  if (file.size > 50 * 1024 * 1024) throw new Error("Fichier trop volumineux (50 Mo maximum).");
+  const allowed = /^(image\/(jpeg|png|webp|gif|svg\+xml)|video\/(mp4|webm|quicktime))$/i;
+  if (!allowed.test(file.type)) throw new Error("Format non pris en charge. Utilisez une image ou une vidéo web.");
+  const path = folder + "/" + safeFileName(file.name);
+  const { error } = await supabase.storage.from("site-media").upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type });
+  if (error) throw new Error(error.message);
+  return supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
+}
+
+function newRowFor(def: TableDef, rows: Row[]) {
+  const row: Row = {};
+  const first = rows.length ? Math.min(...rows.map((r) => Number(r.position ?? 0))) - 1 : 0;
+  if (def.table === "news") Object.assign(row, { author: "LT Group", published_at: todayIsoDate(), is_published: false });
+  if (def.table === "projects") Object.assign(row, { position: first, status: "en_cours", is_published: false, is_featured: false });
+  if (def.table === "partners") Object.assign(row, { position: first, is_active: true });
+  if (def.table === "media_items") Object.assign(row, { kind: "photo", position: first, is_active: true });
+  return row;
+}
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -420,195 +424,81 @@ function Info({ label, value, href }: { label: string; value: string; href?: str
 function CrudPanel({ def }: { def: TableDef }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Row | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
   const queryKey = useMemo(() => ["admin", def.table], [def.table]);
-
   const { data, isLoading } = useQuery({
     queryKey,
     queryFn: async (): Promise<Row[]> => {
-      const { data, error } = await supabase
-        .from(def.table)
-        .select("*")
-        .order(def.order.column, { ascending: def.order.ascending });
+      const { data, error } = await supabase.from(def.table).select("*").order(def.order.column, { ascending: def.order.ascending });
       if (error) throw new Error(error.message);
       return (data ?? []) as Row[];
     },
   });
+  const { data: activities } = useQuery(activitiesQuery);
+  const rows = data ?? [];
+  const categoryOptions = (activities ?? []).map((a) => a.title);
 
   const save = useMutation({
     mutationFn: async (row: Row) => {
       const id = row["id"] as string | undefined;
       const payload: Row = {};
       for (const f of def.fields) payload[f.name] = row[f.name] ?? null;
-      if (id) {
-        const { error } = await supabase.from(def.table).update(payload).eq("id", id);
-        if (error) throw new Error(error.message);
-      } else {
-        const { error } = await supabase.from(def.table).insert(payload);
-        if (error) throw new Error(error.message);
+      for (const f of def.fields) if (f.required && (payload[f.name] === null || payload[f.name] === undefined || payload[f.name] === "")) throw new Error("Le champ « " + f.label + " » est obligatoire.");
+      if ((def.table === "news" || def.table === "projects") && !payload.slug) payload.slug = slugify(String(payload.title ?? ""));
+      if (def.table === "news") { payload.author = "LT Group"; if (!payload.published_at) payload.published_at = todayIsoDate(); }
+      if (!id && (def.table === "projects" || def.table === "partners" || def.table === "media_items")) {
+        const { data: firstRow } = await supabase.from(def.table).select("position").order("position", { ascending: true }).limit(1).maybeSingle();
+        payload.position = firstRow?.position == null ? 0 : Number(firstRow.position) - 1;
       }
+      const result = id ? await supabase.from(def.table).update(payload).eq("id", id) : await supabase.from(def.table).insert(payload);
+      if (result.error) throw new Error(result.error.message);
     },
-    onSuccess: () => {
-      toast.success("Enregistré.");
-      setEditing(null);
-      void qc.invalidateQueries({ queryKey });
-    },
+    onSuccess: () => { toast.success("Enregistré."); setEditing(null); void qc.invalidateQueries({ queryKey }); },
     onError: (e: Error) => toast.error(e.message),
   });
-
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from(def.table).delete().eq("id", id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      toast.success("Supprimé.");
-      void qc.invalidateQueries({ queryKey });
-    },
+    mutationFn: async (id: string) => { const { error } = await supabase.from(def.table).delete().eq("id", id); if (error) throw new Error(error.message); },
+    onSuccess: () => { toast.success("Supprimé."); void qc.invalidateQueries({ queryKey }); },
     onError: (e: Error) => toast.error(e.message),
   });
-
   if (isLoading) return <p className="text-sm text-muted-foreground">Chargement…</p>;
-  const rows = data ?? [];
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl">{def.label}</h2>
-        {def.create ? (
-          <Button variant="gold" size="sm" onClick={() => setEditing({})}>
-            Ajouter
-          </Button>
-        ) : null}
+      <div className="flex items-center justify-between gap-4">
+        <div><p className="eyebrow">{def.table === "testimonials" ? "Modération" : "Gestion de contenu"}</p><h2 className="mt-1 text-2xl">{def.label}</h2></div>
+        {def.create ? <Button variant="gold" size="sm" onClick={() => setEditing(newRowFor(def, rows))}>Ajouter</Button> : null}
       </div>
-
       {editing ? (
-        <form
-          className="mt-6 grid gap-4 rounded-lg border border-border bg-card p-5 sm:grid-cols-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            save.mutate(editing);
-          }}
-        >
+        <form className="mt-6 grid gap-4 rounded-lg border border-border bg-card p-5 shadow-sm sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(editing); }}>
+          {def.table === "testimonials" ? <div className="sm:col-span-2 rounded-md bg-muted p-4 text-sm"><p className="font-medium">{String(editing.author_name ?? "")}</p><p className="mt-1 text-muted-foreground">{String(editing.message ?? "")}</p><p className="mt-2 text-xs text-muted-foreground">{String(editing.company ?? "")}</p></div> : null}
           {def.fields.map((f) => (
-            <label
-              key={f.name}
-              className={f.kind === "textarea" ? "text-sm sm:col-span-2" : "text-sm"}
-            >
-              {f.label}
-              {f.kind === "textarea" ? (
-                <textarea
-                  rows={4}
-                  className={field}
-                  required={f.required}
-                  value={String(editing[f.name] ?? "")}
-                  onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}
-                />
-              ) : f.kind === "boolean" ? (
-                <div className="mt-2">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(editing[f.name])}
-                    onChange={(e) => setEditing({ ...editing, [f.name]: e.target.checked })}
-                  />
+            <label key={f.name} className={f.kind === "textarea" || f.kind === "file" ? "text-sm sm:col-span-2" : "text-sm"}>
+              <span className="font-medium">{f.label}</span>
+              {f.kind === "textarea" ? <textarea rows={4} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })} />
+              : f.kind === "boolean" ? <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={Boolean(editing[f.name])} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.checked })} /><span className="text-xs text-muted-foreground">{editing[f.name] ? "Activé" : "Désactivé"}</span></div>
+              : f.kind === "select" ? <select className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}><option value="">—</option>{(f.name === "category" ? categoryOptions : f.options ?? []).map((o) => <option key={o} value={o}>{o}</option>)}</select>
+              : f.kind === "file" ? (
+                <div className="mt-2 rounded-md border border-dashed border-border p-4">
+                  <input type="file" accept={f.accept ?? (def.table === "media_items" && editing.kind === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
+                    try { const folder = def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
+                    catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
+                    finally { setUploading(null); e.currentTarget.value = ""; }
+                  }} />
+                  {uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}
+                  {editing[f.name] ? <div className="mt-3 flex items-center gap-3 rounded-md bg-muted p-2"><span className="min-w-0 flex-1 truncate text-xs">{String(editing[f.name])}</span><button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-background" onClick={() => setEditing({ ...editing, [f.name]: null })} aria-label={"Supprimer le fichier " + f.label}><X className="h-4 w-4" /></button></div> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier sélectionné.</p>}
                 </div>
-              ) : f.kind === "select" ? (
-                <select
-                  className={field}
-                  required={f.required}
-                  value={String(editing[f.name] ?? "")}
-                  onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}
-                >
-                  <option value="">—</option>
-                  {(f.options ?? []).map((o) => (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={f.kind === "number" ? "number" : "text"}
-                  className={field}
-                  required={f.required}
-                  value={String(editing[f.name] ?? "")}
-                  onChange={(e) =>
-                    setEditing({
-                      ...editing,
-                      [f.name]:
-                        f.kind === "number"
-                          ? e.target.value === ""
-                            ? null
-                            : Number(e.target.value)
-                          : e.target.value,
-                    })
-                  }
-                />
-              )}
+              ) : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects") && f.name === "title" && !editing.id) next.slug = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
             </label>
           ))}
-          <div className="flex gap-2 sm:col-span-2">
-            <Button type="submit" variant="gold" disabled={save.isPending}>
-              {save.isPending ? "Enregistrement…" : "Enregistrer"}
-            </Button>
-            <Button type="button" variant="outline" onClick={() => setEditing(null)}>
-              Annuler
-            </Button>
-          </div>
+          <div className="flex gap-2 sm:col-span-2"><Button type="submit" variant="gold" disabled={save.isPending || uploading !== null}>{save.isPending ? "Enregistrement…" : "Enregistrer"}</Button><Button type="button" variant="outline" onClick={() => setEditing(null)}>Annuler</Button></div>
         </form>
       ) : null}
-
-      <div className="mt-6 overflow-x-auto rounded-lg border border-border">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-muted/60">
-            <tr>
-              {def.columns.map((c) => (
-                <th key={c} className="px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                  {c}
-                </th>
-              ))}
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={String(row["id"])} className="border-t border-border">
-                {def.columns.map((c) => (
-                  <td key={c} className="px-4 py-3">
-                    {typeof row[c] === "boolean"
-                      ? row[c]
-                        ? "Oui"
-                        : "Non"
-                      : String(row[c] ?? "—")}
-                  </td>
-                ))}
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setEditing(row)}>
-                      Modifier
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"]));
-                      }}
-                    >
-                      Supprimer
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 ? (
-              <tr>
-                <td className="px-4 py-6 text-muted-foreground" colSpan={def.columns.length + 1}>
-                  Aucun élément.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      <div className="mt-6 overflow-x-auto rounded-lg border border-border"><table className="w-full text-left text-sm"><thead className="bg-muted/60"><tr>{def.columns.map((c) => <th key={c} className="px-4 py-3 text-xs uppercase tracking-[0.12em]">{c}</th>)}<th className="px-4 py-3" /></tr></thead><tbody>
+        {rows.map((row) => <tr key={String(row["id"])} className="border-t border-border">{def.columns.map((c) => <td key={c} className="px-4 py-3">{typeof row[c] === "boolean" ? (row[c] ? "Oui" : "Non") : String(row[c] ?? "—")}</td>)}<td className="px-4 py-3 text-right"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
+        {rows.length === 0 ? <tr><td className="px-4 py-6 text-muted-foreground" colSpan={def.columns.length + 1}>Aucun élément.</td></tr> : null}
+      </tbody></table></div>
     </div>
   );
 }
