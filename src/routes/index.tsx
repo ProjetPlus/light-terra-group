@@ -48,36 +48,73 @@ export const Route = createFileRoute("/")({
 function IntroVideoLoop() {
   const { data: videos } = useQuery(introVideosQuery);
   const [current, setCurrent] = useState(0);
-  const ref = useRef<HTMLVideoElement>(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
   const list = videos ?? [];
 
+  const advance = () => {
+    if (list.length < 2 || transitioning) return;
+    const next = (current + 1) % list.length;
+    const nextVideo = refs[1].current;
+    if (!nextVideo) return;
+    setTransitioning(true);
+    void nextVideo.play().catch(() => undefined);
+    window.setTimeout(() => {
+      setCurrent(next);
+      setTransitioning(false);
+    }, 450);
+  };
+
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.load();
-    void el.play().catch(() => undefined);
-  }, [current, list.length]);
+    if (list.length === 0) return;
+    refs[0].current?.load();
+    refs[1].current?.load();
+    void refs[0].current?.play().catch(() => undefined);
+  }, [list.length]);
+
+  useEffect(() => {
+    if (list.length < 2) return;
+    const next = (current + 1) % list.length;
+    const nextVideo = refs[1].current;
+    if (!nextVideo) return;
+    nextVideo.src = list[next]?.video_url ?? "";
+    nextVideo.load();
+  }, [current, list]);
 
   if (list.length === 0) return null;
 
+  const next = list.length > 1 ? (current + 1) % list.length : current;
   return (
-    <div className="overflow-hidden rounded-lg border border-gold/25 shadow-elevated">
+    <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
       <video
-        ref={ref}
-        key={list[current]?.id}
-        className="aspect-video w-full bg-black object-cover"
+        ref={refs[0]}
         src={list[current]?.video_url}
+        className={transitioning ? "absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500" : "absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-500"}
         muted
         playsInline
         autoPlay
         preload="auto"
         loop={list.length === 1}
-        onEnded={() => setCurrent((c) => (c + 1) % list.length)}
+        onTimeUpdate={(e) => {
+          const el = e.currentTarget;
+          if (list.length > 1 && el.duration && el.currentTime >= el.duration - 0.5) advance();
+        }}
+        onEnded={advance}
       />
+      {list.length > 1 ? (
+        <video
+          ref={refs[1]}
+          src={list[next]?.video_url}
+          className={transitioning ? "absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-500" : "absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500"}
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        />
+      ) : null}
     </div>
   );
 }
-
 function Hero() {
   const { data: slides } = useQuery(heroSlidesQuery);
   const [index, setIndex] = useState(0);
@@ -165,6 +202,9 @@ function Hero() {
             </div>
           ) : null}
         </div>
+      </div>
+      <div className="relative z-10 mx-auto mt-2 w-full max-w-7xl px-5 lg:px-8">
+        <MediaGallery />
       </div>
     </section>
   );
