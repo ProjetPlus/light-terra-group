@@ -385,11 +385,15 @@ type Message = {
 function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
   const queries = [
     ["Demandes", "messages"],
+    ["Accueil — visuels", "hero_slides"],
+    ["Pôles d'activité", "activities"],
+    ["Vidéos accueil", "intro_videos"],
     ["Actualités", "news"],
     ["Projets", "projects"],
     ["Photos & vidéos", "media_items"],
     ["Témoignages", "testimonials"],
     ["Partenaires", "partners"],
+    ["Informations du groupe", "company_info"],
   ] as const;
   return (
     <div className="space-y-8">
@@ -414,15 +418,23 @@ function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
   );
 }
 function DashboardCard({ label, table, onClick }: { label: string; table: TableDef["table"] | "messages"; onClick?: () => void }) {
-  const { data } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["admin", "count", table],
     queryFn: async () => {
       const { count, error } = await supabase.from(table).select("id", { count: "exact", head: true });
-      if (error) return 0;
+      if (error) throw new Error(error.message);
       return count ?? 0;
     },
   });
-  return <button type="button" onClick={onClick} className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gold"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold tracking-tight">{data ?? "—"}</p><p className="mt-1 text-xs text-slate-400">élément(s) — ouvrir</p></button>;
+  const value = isLoading ? "…" : isError ? "!" : String(data ?? 0);
+  const detail = isError ? (error instanceof Error ? error.message : "Erreur de connexion") : "élément(s) — ouvrir";
+  return (
+    <button type="button" onClick={onClick} className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gold">
+      <p className="text-sm text-slate-500">{label}</p>
+      <p className={"mt-2 text-3xl font-semibold tracking-tight " + (isError ? "text-red-600" : "")}>{value}</p>
+      <p className="mt-1 truncate text-xs text-slate-400">{detail}</p>
+    </button>
+  );
 }
 
 function MessagesPanel() {
@@ -564,7 +576,7 @@ function CrudPanel({ def }: { def: TableDef }) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("tous");
   const queryKey = useMemo(() => ["admin", def.table], [def.table]);
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: async (): Promise<Row[]> => {
       const { data, error } = await supabase.from(def.table).select("*").order(def.order.column, { ascending: def.order.ascending });
@@ -603,6 +615,13 @@ function CrudPanel({ def }: { def: TableDef }) {
     onError: (e: Error) => toast.error(e.message),
   });
   if (isLoading) return <p className="text-sm text-muted-foreground">Chargement…</p>;
+  if (isError) return (
+    <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+      <p className="font-medium text-red-800">Impossible de charger « {def.label} ».</p>
+      <p className="mt-2 text-sm text-red-700">{error instanceof Error ? error.message : "Erreur de connexion à Supabase."}</p>
+      <p className="mt-3 text-xs text-red-600">La page ne masque plus les erreurs par un zéro : vérifiez la connexion Supabase et rechargez.</p>
+    </div>
+  );
 
   return (
     <div>
