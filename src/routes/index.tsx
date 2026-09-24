@@ -85,7 +85,7 @@ function IntroVideoLoop() {
 
   useEffect(() => {
     if (!list.length) return;
-    const first = refs[0].current;
+    const first = refs.at(0)?.current;
     if (!first) return;
     const firstUrl = list.at(0)?.video_url;
     if (!firstUrl) return;
@@ -101,7 +101,7 @@ function IntroVideoLoop() {
 
   useEffect(() => {
     if (list.length < 2) return;
-    const hidden = refs[1 - front].current;
+    const hidden = refs.at(1 - front)?.current;
     const nextUrl = list[next]?.video_url;
     if (!hidden || !nextUrl) return;
 
@@ -121,7 +121,7 @@ function IntroVideoLoop() {
 
   useEffect(() => {
     if (list.length < 2 || !ready) return;
-    const current = refs[front].current;
+    const current = refs.at(front)?.current;
     const hidden = refs[1 - front].current;
     if (!current || !hidden || !Number.isFinite(current.duration) || current.duration <= 0) return;
 
