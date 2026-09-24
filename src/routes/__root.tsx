@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FAVICON_URL, LOGO_URL, SITE_URL, OG_IMAGE_URL } from "@/lib/media";
+import { companyQuery } from "@/lib/site-data";
 
 const SITE_NAME = "LIGHT TERRA GROUP";
 const SITE_TITLE = "LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
@@ -80,7 +81,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  loader: ({ context }) => context.queryClient.ensureQueryData(companyQuery),
+  head: ({ loaderData }) => {
+    const configuredLogo = loaderData?.logo_url || LOGO_URL;
+    const configuredLogoAbsolute = configuredLogo.startsWith("http") ? configuredLogo : new URL(configuredLogo, SITE_URL).toString();
+    return ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -96,24 +101,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: SITE_DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL },
-      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:image", content: configuredLogoAbsolute },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
       { name: "twitter:description", content: SITE_DESCRIPTION },
-      { name: "twitter:image", content: OG_IMAGE_URL },
+      { name: "twitter:image", content: configuredLogoAbsolute },
       { name: "twitter:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "canonical", href: SITE_URL },
-      { rel: "icon", href: FAVICON_URL, type: "image/png" },
-      { rel: "shortcut icon", href: FAVICON_URL, type: "image/png" },
-      { rel: "apple-touch-icon", href: FAVICON_URL },
+      { rel: "icon", href: configuredLogo, type: "image/png" },
+      { rel: "shortcut icon", href: configuredLogo, type: "image/png" },
+      { rel: "apple-touch-icon", href: configuredLogo },
     ],
-  }),
+    });
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
