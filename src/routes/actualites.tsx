@@ -37,16 +37,18 @@ function Page() {
 
         <div className="grid gap-8">
           {list.map((item) => (
-            <article
+            <Link
               key={item.id}
-              className="grid gap-6 overflow-hidden rounded-lg border border-border bg-card md:grid-cols-[280px_1fr]"
+              to="/actualites/$slug"
+              params={{ slug: item.slug }}
+              className="group grid gap-6 overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated md:grid-cols-[280px_1fr]"
             >
               {item.image_url ? (
                 <img
                   src={item.image_url}
                   alt={item.title}
                   loading="lazy"
-                  className="h-full min-h-48 w-full object-cover"
+                  className="h-full min-h-48 w-full object-cover transition duration-500 group-hover:scale-[1.02]"
                 />
               ) : null}
               <div className="p-6">
@@ -70,15 +72,9 @@ function Page() {
                     </video>
                   </div>
                 ) : null}
-                <Link
-                  to="/actualites/$slug"
-                  params={{ slug: item.slug }}
-                  className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4"
-                >
-                  Lire l’actualité →
-                </Link>
+                <span className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">Lire l’actualité →</span>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
