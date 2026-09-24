@@ -22,3 +22,6 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+
+<!-- CI verification 2026-09-24 -->
