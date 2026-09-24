@@ -1,8 +1,8 @@
 // Médias de marque servis directement avec le site.
 export const SITE_URL = "https://lightterragroup.com";
-export const LOGO_URL = "https://ghkijyimotuivykvwlge.supabase.co/storage/v1/object/public/site-media/brand/logo.png";
-export const FAVICON_URL = "https://ghkijyimotuivykvwlge.supabase.co/storage/v1/object/public/site-media/brand/logo.png";
-export const OG_IMAGE_URL = "https://ghkijyimotuivykvwlge.supabase.co/storage/v1/object/public/site-media/brand/logo.png";
+export const LOGO_URL = "/media/logo-light-terra-transparent.png";
+export const FAVICON_URL = "/media/favicon-light-terra.png";
+export const OG_IMAGE_URL = `${SITE_URL}/media/og-light-terra.png`;
 export const LOGO_ALT = "Logo officiel LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
 export const ASSISTANT_AVATAR_URL = "/media/assistant-avatar.jpg";
 
