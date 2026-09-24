@@ -50,41 +50,64 @@ function IntroVideoLoop() {
   const list = videos ?? [];
   const [active, setActive] = useState(0);
   const [front, setFront] = useState(0);
+  const [ready, setReady] = useState(false);
   const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
 
-  useEffect(() => {
-    if (list.length === 0) return;
-    const next = (active + 1) % list.length;
-    const hidden = refs[1 - front].current;
-    if (!hidden) return;
-    hidden.src = list[next]?.video_url ?? "";
-    hidden.load();
-  }, [active, front, list]);
+  const next = list.length > 1 ? (active + 1) % list.length : active;
 
   useEffect(() => {
-    if (list.length === 0) return;
+    if (!list.length) return;
     const current = refs[front].current;
-    if (!current) return;
-    current.src = list[active]?.video_url ?? "";
+    const hidden = refs[1 - front].current;
+    const currentUrl = list[active]?.video_url;
+    const nextUrl = list[next]?.video_url;
+    if (!current || !hidden || !currentUrl) return;
+
+    setReady(false);
+    current.src = currentUrl;
+    current.preload = "auto";
     current.load();
-    void current.play().catch(() => undefined);
-  }, [active, front, list]);
 
-  const advance = () => {
-    if (list.length < 2) return;
-    const next = (active + 1) % list.length;
-    const hiddenIndex = 1 - front;
-    const hidden = refs[hiddenIndex].current;
-    if (!hidden || hidden.readyState < 3) {
-      window.setTimeout(advance, 120);
-      return;
+    const prepare = () => {
+      void current.play().catch(() => undefined);
+    };
+    current.addEventListener("canplay", prepare, { once: true });
+
+    if (nextUrl && list.length > 1) {
+      hidden.src = nextUrl;
+      hidden.preload = "auto";
+      hidden.load();
+      const markReady = () => setReady(true);
+      hidden.addEventListener("canplay", markReady, { once: true });
+      hidden.addEventListener("loadeddata", markReady, { once: true });
+      return () => {
+        current.removeEventListener("canplay", prepare);
+        hidden.removeEventListener("canplay", markReady);
+        hidden.removeEventListener("loadeddata", markReady);
+      };
     }
-    void hidden.play().catch(() => undefined);
-    setFront(hiddenIndex);
-    setActive(next);
-  };
 
-  if (list.length === 0) return null;
+    return () => current.removeEventListener("canplay", prepare);
+  }, [active, front, next, list]);
+
+  useEffect(() => {
+    if (list.length < 2 || !ready) return;
+    const current = refs[front].current;
+    const hidden = refs[1 - front].current;
+    if (!current || !hidden || !Number.isFinite(current.duration) || current.duration <= 0) return;
+
+    const lead = 0.8;
+    const remaining = Math.max(0.25, current.duration - current.currentTime - lead);
+    const timer = window.setTimeout(() => {
+      void hidden.play().catch(() => undefined);
+      setFront(1 - front);
+      setActive(next);
+    }, remaining * 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [active, front, next, ready, list]);
+
+  if (!list.length) return null;
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
@@ -92,17 +115,11 @@ function IntroVideoLoop() {
         <video
           key={slot}
           ref={refs[slot]}
-          className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-500 " + (slot === front ? "opacity-100" : "opacity-0")}
+          className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out " + (slot === front ? "opacity-100" : "opacity-0")}
           muted
           playsInline
           preload="auto"
           aria-hidden={slot !== front}
-          onTimeUpdate={(e) => {
-            if (slot !== front || list.length < 2) return;
-            const el = e.currentTarget;
-            if (el.duration && el.currentTime >= el.duration - 0.35) advance();
-          }}
-          onEnded={() => { if (slot === front) advance(); }}
         />
       ))}
     </div>
