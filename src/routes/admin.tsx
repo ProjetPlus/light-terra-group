@@ -82,9 +82,9 @@ const TABLES: TableDef[] = [
   },
 
   {
-    key: "company_info", label: "Informations du groupe", table: "company_info",
+    key: "company_info", label: "Paramètres — identité & logo", table: "company_info",
     order: { column: "updated_at", ascending: false },
-    columns: ["name", "email", "phone_primary", "city"], create: true,
+    columns: ["name", "logo_url", "email", "phone_primary", "city"], create: true,
     fields: [
       { name: "name", label: "Nom", kind: "text", required: true },
       { name: "slogan", label: "Slogan", kind: "text", required: true },
@@ -145,6 +145,8 @@ const TABLES: TableDef[] = [
       { name: "author", label: "Auteur", kind: "text" },
       { name: "published_at", label: "Date de publication", kind: "text" },
       { name: "is_published", label: "Publiée", kind: "boolean" },
+      { name: "video_url", label: "Vidéo de l’actualité", kind: "file", accept: "video/mp4,video/webm,video/quicktime" },
+      { name: "video_poster_url", label: "Affiche de la vidéo", kind: "file", accept: "image/*" },
     ],
   },
   {
