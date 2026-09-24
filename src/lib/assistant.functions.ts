@@ -13,7 +13,7 @@ const schema = z.object({
 
 type KnowledgeRow = { question: string; answer: string; is_active: boolean; position: number };
 type SiteContext = {
-  company: Record<string, unknown> | null;
+  company: Record<string, any> | null;
   activities: Array<{ title: string; short_description: string | null }>;
   knowledge: KnowledgeRow[];
   projects: Array<{ title: string; summary: string | null; location: string | null }>;
@@ -92,7 +92,7 @@ export const askAssistant = createServerFn({ method: "POST" })
         client.from("news").select("title,excerpt,published_at").eq("is_published", true).order("published_at", { ascending: false }).limit(8),
       ]);
       ctx = {
-        company: info.data as Record<string, unknown> | null,
+        company: info.data as Record<string, any> | null,
         activities: (activities.data ?? []) as SiteContext["activities"],
         knowledge: (kb.data ?? []) as KnowledgeRow[],
         projects: (projects.data ?? []) as SiteContext["projects"],
