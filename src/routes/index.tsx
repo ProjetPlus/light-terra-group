@@ -47,71 +47,64 @@ export const Route = createFileRoute("/")({
 /** Lecture en boucle continue des séquences vidéo, sans coupure visible. */
 function IntroVideoLoop() {
   const { data: videos } = useQuery(introVideosQuery);
-  const [current, setCurrent] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
-  const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
   const list = videos ?? [];
-
-  const advance = () => {
-    if (list.length < 2 || transitioning) return;
-    const next = (current + 1) % list.length;
-    const nextVideo = refs[1].current;
-    if (!nextVideo) return;
-    setTransitioning(true);
-    void nextVideo.play().catch(() => undefined);
-    window.setTimeout(() => {
-      setCurrent(next);
-      setTransitioning(false);
-    }, 450);
-  };
+  const [active, setActive] = useState(0);
+  const [front, setFront] = useState(0);
+  const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
 
   useEffect(() => {
     if (list.length === 0) return;
-    refs[0].current?.load();
-    refs[1].current?.load();
-    void refs[0].current?.play().catch(() => undefined);
-  }, [list.length]);
+    const next = (active + 1) % list.length;
+    const hidden = refs[1 - front].current;
+    if (!hidden) return;
+    hidden.src = list[next]?.video_url ?? "";
+    hidden.load();
+  }, [active, front, list]);
 
   useEffect(() => {
+    if (list.length === 0) return;
+    const current = refs[front].current;
+    if (!current) return;
+    current.src = list[active]?.video_url ?? "";
+    current.load();
+    void current.play().catch(() => undefined);
+  }, [active, front, list]);
+
+  const advance = () => {
     if (list.length < 2) return;
-    const next = (current + 1) % list.length;
-    const nextVideo = refs[1].current;
-    if (!nextVideo) return;
-    nextVideo.src = list[next]?.video_url ?? "";
-    nextVideo.load();
-  }, [current, list]);
+    const next = (active + 1) % list.length;
+    const hiddenIndex = 1 - front;
+    const hidden = refs[hiddenIndex].current;
+    if (!hidden || hidden.readyState < 3) {
+      window.setTimeout(advance, 120);
+      return;
+    }
+    void hidden.play().catch(() => undefined);
+    setFront(hiddenIndex);
+    setActive(next);
+  };
 
   if (list.length === 0) return null;
 
-  const next = list.length > 1 ? (current + 1) % list.length : current;
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
-      <video
-        ref={refs[0]}
-        src={list[current]?.video_url}
-        className={transitioning ? "absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500" : "absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-500"}
-        muted
-        playsInline
-        autoPlay
-        preload="auto"
-        loop={list.length === 1}
-        onTimeUpdate={(e) => {
-          const el = e.currentTarget;
-          if (list.length > 1 && el.duration && el.currentTime >= el.duration - 0.5) advance();
-        }}
-        onEnded={advance}
-      />
-      {list.length > 1 ? (
+      {[0, 1].map((slot) => (
         <video
-          ref={refs[1]}
-          src={list[next]?.video_url}
-          className={transitioning ? "absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-500" : "absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500"}
+          key={slot}
+          ref={refs[slot]}
+          className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-500 " + (slot === front ? "opacity-100" : "opacity-0")}
           muted
           playsInline
           preload="auto"
-          aria-hidden="true"
+          aria-hidden={slot !== front}
+          onTimeUpdate={(e) => {
+            if (slot !== front || list.length < 2) return;
+            const el = e.currentTarget;
+            if (el.duration && el.currentTime >= el.duration - 0.35) advance();
+          }}
+          onEnded={() => { if (slot === front) advance(); }}
         />
-      ) : null}
+      ))}
     </div>
   );
 }
