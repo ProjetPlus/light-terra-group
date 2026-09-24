@@ -123,7 +123,7 @@ function IntroVideoLoop() {
   useEffect(() => {
     if (list.length < 2 || !ready) return;
     const current = front === 0 ? frontRef.current : backRef.current;
-    const hidden = refs[1 - front].current;
+    const hidden = front === 0 ? backRef.current : frontRef.current;
     if (!current || !hidden || !Number.isFinite(current.duration) || current.duration <= 0) return;
 
     const lead = 0.7;
