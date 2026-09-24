@@ -3,16 +3,72 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 
 const schema = z.object({
-  messages: z
-    .array(
-      z.object({
-        role: z.enum(["user", "assistant"]),
-        content: z.string().min(1).max(2000),
-      }),
-    )
-    .min(1)
-    .max(20),
+  messages: z.array(
+    z.object({
+      role: z.enum(["user", "assistant"]),
+      content: z.string().min(1).max(2000),
+    }),
+  ).min(1).max(20),
 });
+
+type KnowledgeRow = { question: string; answer: string; is_active: boolean; position: number };
+type SiteContext = {
+  company: Record<string, unknown> | null;
+  activities: Array<{ title: string; short_description: string | null }>;
+  knowledge: KnowledgeRow[];
+  projects: Array<{ title: string; summary: string | null; location: string | null }>;
+  news: Array<{ title: string; excerpt: string | null; published_at: string | null }>;
+};
+
+function localReply(question: string, ctx: SiteContext) {
+  const q = question.toLowerCase();
+  const normalize = (value: string) =>
+    value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const nq = normalize(question);
+  const scored = ctx.knowledge
+    .filter((item) => item.is_active)
+    .map((item) => {
+      const hay = normalize(item.question + " " + item.answer);
+      const words = nq.split(/\s+/).filter((w) => w.length > 3);
+      const score = words.reduce((n, word) => n + (hay.includes(word) ? 1 : 0), 0);
+      return { item, score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  if (scored[0]?.score > 0) return scored[0].item.answer;
+
+  if (/activit|service|fait|metier|domaine|secteur/.test(nq) && ctx.activities.length) {
+    return "LIGHT TERRA GROUP intervient notamment dans " +
+      ctx.activities.slice(0, 5).map((a) => a.title).join(", ") +
+      ". Vous pouvez consulter la page « Nos activités » pour le détail.";
+  }
+
+  if (/projet|realisation|chantier/.test(nq) && ctx.projects.length) {
+    return "Les projets publiés sur le site comprennent notamment : " +
+      ctx.projects.slice(0, 4).map((p) => p.title + (p.location ? " (" + p.location + ")" : "")).join(", ") +
+      ". Consultez la page « Projets » pour voir les détails.";
+  }
+
+  if (/actualite|nouvelle|news/.test(nq) && ctx.news.length) {
+    return "Les dernières actualités publiées sont : " +
+      ctx.news.slice(0, 3).map((n) => n.title).join(", ") +
+      ". Vous pouvez consulter la page « Actualités ».";
+  }
+
+  const company = ctx.company ?? {};
+  if (/contact|telephone|whatsapp|email|mail|joindre|adresse/.test(nq)) {
+    const parts = [
+      company.phone_primary ? "Téléphone : " + company.phone_primary : "",
+      company.whatsapp ? "WhatsApp : " + company.whatsapp : "",
+      company.email ? "E-mail : " + company.email : "",
+      company.address ? "Adresse : " + [company.address, company.city, company.country].filter(Boolean).join(", ") : "",
+    ].filter(Boolean);
+    if (parts.length) return parts.join(" — ");
+  }
+
+  return "Je peux vous renseigner sur les activités, projets, actualités et coordonnées de LIGHT TERRA GROUP. Pour une demande précise ou un devis, utilisez la page « Services & devis » ou « Contact ».";
+}
 
 export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => schema.parse(data))
@@ -21,95 +77,95 @@ export const askAssistant = createServerFn({ method: "POST" })
     const supabaseKey =
       process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
 
-    let knowledge = "";
-    let company = "";
+    const empty: SiteContext = { company: null, activities: [], knowledge: [], projects: [], news: [] };
+    let ctx = empty;
 
     if (supabaseUrl && supabaseKey) {
       const client = createClient(supabaseUrl, supabaseKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
-      const [kb, info, activities] = await Promise.all([
-        client.from("ai_knowledge").select("question,answer").eq("is_active", true),
+      const [kb, info, activities, projects, news] = await Promise.all([
+        client.from("ai_knowledge").select("question,answer,is_active,position").eq("is_active", true).order("position"),
         client.from("company_info").select("*").limit(1).maybeSingle(),
-        client.from("activities").select("title,short_description").eq("is_active", true),
+        client.from("activities").select("title,short_description").eq("is_active", true).order("position"),
+        client.from("projects").select("title,summary,location").eq("is_published", true).order("position").limit(8),
+        client.from("news").select("title,excerpt,published_at").eq("is_published", true).order("published_at", { ascending: false }).limit(8),
       ]);
-      knowledge = (kb.data ?? []).map((k) => `Q: ${k.question}\nR: ${k.answer}`).join("\n\n");
-      const acts = (activities.data ?? [])
-        .map((a) => `- ${a.title} : ${a.short_description}`)
-        .join("\n");
-      company = [
-        info.data ? `Nom: ${info.data.name}` : "",
-        info.data?.slogan ? `Slogan: ${info.data.slogan}` : "",
-        info.data?.description ? `Présentation: ${info.data.description}` : "",
-        info.data?.phone_primary ? `Téléphone: ${info.data.phone_primary}` : "",
-        info.data?.whatsapp ? `WhatsApp: ${info.data.whatsapp}` : "",
-        info.data?.email ? `E-mail: ${info.data.email}` : "",
-        [info.data?.address, info.data?.city, info.data?.country].filter(Boolean).length
-          ? `Adresse: ${[info.data?.address, info.data?.city, info.data?.country].filter(Boolean).join(", ")}`
-          : "",
-        acts ? `Pôles d'activité:\n${acts}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n");
+      ctx = {
+        company: info.data as Record<string, unknown> | null,
+        activities: (activities.data ?? []) as SiteContext["activities"],
+        knowledge: (kb.data ?? []) as KnowledgeRow[],
+        projects: (projects.data ?? []) as SiteContext["projects"],
+        news: (news.data ?? []) as SiteContext["news"],
+      };
     }
 
-    const system = `Tu es Raï, l'assistante virtuelle officielle du site de LIGHT TERRA GROUP. Tu te présentes ainsi : « Bonjour, je suis Raï de LIGHT TERRA GROUP ». Tu réponds en français, brièvement (3 phrases maximum), avec un ton professionnel et chaleureux.
+    const latestUserMessage = [...data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
-Règles strictes :
-- Utilise UNIQUEMENT les informations ci-dessous. N'invente jamais de projet, prix, adresse, délai, engagement ou coordonnée.
-- Si l'information n'est pas disponible, dis-le et invite la personne à utiliser la page Contact ou le formulaire de demande de devis.
-- Oriente vers les pages du site quand c'est utile : /a-propos, /activites, /projets, /services, /actualites, /temoignages, /contact.
+    const system = `Tu es Raï, l'assistante virtuelle officielle de LIGHT TERRA GROUP. Réponds en français, avec un ton professionnel et chaleureux, en 3 phrases maximum. Utilise uniquement le contexte fourni et n'invente jamais d'information. Si une information n'est pas disponible, oriente vers les pages Contact ou Services & devis.
 
-INFORMATIONS ENTREPRISE
-${company || "Non renseignées pour le moment."}
+CONTEXTE ENTREPRISE:
+${JSON.stringify(ctx.company ?? {})}
 
-BASE DE CONNAISSANCES
-${knowledge || "Vide."}`;
+ACTIVITÉS:
+${ctx.activities.map((a) => "- " + a.title + ": " + (a.short_description ?? "")).join("\\n")}
 
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) {
-      return { ok: false as const, status: 401, message: "Assistant indisponible pour le moment." };
+BASE DE CONNAISSANCES:
+${ctx.knowledge.map((k) => "Q: " + k.question + "\\nR: " + k.answer).join("\\n\\n")}
+
+PROJETS:
+${ctx.projects.map((p) => "- " + p.title + (p.location ? " — " + p.location : "") + (p.summary ? ": " + p.summary : "")).join("\\n")}
+
+ACTUALITÉS:
+${ctx.news.map((n) => "- " + n.title + (n.excerpt ? ": " + n.excerpt : "")).join("\\n")}`;
+
+    const openAiKey = process.env["OPENAI_API_KEY"];
+    const lovableKey = process.env["LOVABLE_API_KEY"];
+
+    try {
+      if (openAiKey) {
+        const response = await fetch("https://api.openai.com/v1/responses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${openAiKey}` },
+          body: JSON.stringify({
+            model: process.env["OPENAI_MODEL"] ?? "gpt-5.6-luna",
+            instructions: system,
+            input: data.messages.map((m) => ({ role: m.role, content: m.content })),
+          }),
+        });
+        if (response.ok) {
+          const payload = (await response.json()) as { output_text?: string };
+          const reply = payload.output_text?.trim();
+          if (reply) return { ok: true as const, reply };
+        } else {
+          console.error("OpenAI assistant error", response.status, await response.text());
+        }
+      } else if (lovableKey) {
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}` },
+          body: JSON.stringify({
+            model: "openai/gpt-5.6-terra",
+            input: [{ role: "system", content: system }, ...data.messages],
+          }),
+        });
+        if (response.ok) {
+          const payload = (await response.json()) as {
+            output_text?: string;
+            output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
+          };
+          const reply =
+            payload.output_text ??
+            payload.output?.flatMap((item) => item.content ?? []).map((c) => c.text ?? "").join("");
+          if (reply?.trim()) return { ok: true as const, reply: reply.trim() };
+        } else {
+          console.error("Lovable assistant error", response.status, await response.text());
+        }
+      }
+    } catch (error) {
+      console.error("Assistant provider error", error);
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-5.6-terra",
-        input: [
-          { role: "system", content: system },
-          ...data.messages.map((m) => ({ role: m.role, content: m.content })),
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      console.error("AI gateway error", response.status, detail);
-      const message =
-        response.status === 429
-          ? "Trop de demandes en ce moment, merci de réessayer dans un instant."
-          : response.status === 402
-            ? "L'assistant est momentanément indisponible. Utilisez la page Contact."
-            : "L'assistant n'a pas pu répondre. Utilisez la page Contact.";
-      return { ok: false as const, status: response.status, message };
-    }
-
-    const payload = (await response.json()) as {
-      output_text?: string;
-      output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
-    };
-    const text =
-      payload.output_text ??
-      payload.output
-        ?.flatMap((item) => item.content ?? [])
-        .filter((c) => c.type === "output_text" || typeof c.text === "string")
-        .map((c) => c.text ?? "")
-        .join("") ??
-      "";
-
-    return { ok: true as const, reply: text.trim() || "Je n'ai pas de réponse pour cette question." };
+    // Fallback autonome : Raï reste fonctionnelle même sans fournisseur IA externe.
+    return { ok: true as const, reply: localReply(latestUserMessage, ctx) };
   });
