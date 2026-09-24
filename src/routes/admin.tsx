@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LOGO_URL } from "@/lib/media";
-import { activitiesQuery, formatDateFr } from "@/lib/site-data";
+import { activitiesQuery, companyQuery, formatDateFr } from "@/lib/site-data";
 import { replyToMessage } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -265,6 +265,7 @@ function AdminPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [tab, setTab] = useState("messages");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: company } = useQuery(companyQuery);
 
   useEffect(() => {
     let active = true;
@@ -300,7 +301,7 @@ function AdminPage() {
       <aside className={"fixed inset-y-0 left-0 z-50 w-[280px] border-r border-white/10 bg-[#0b1f18] text-ink-foreground transition-transform lg:translate-x-0 " + (mobileOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex h-full flex-col shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
-            <img src={LOGO_URL} alt="LIGHT TERRA GROUP" className="h-10 w-auto" />
+            <img src={company?.logo_url || LOGO_URL} alt="LIGHT TERRA GROUP" className="h-10 w-auto" />
             <button type="button" className="rounded-md p-2 hover:bg-white/10 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
               <X className="h-5 w-5" />
             </button>
