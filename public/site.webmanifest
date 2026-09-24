@@ -10,7 +10,7 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/media/logo-light-terra.png",
+      "src": "/media/favicon-light-terra.png",
       "sizes": "1536x1024",
       "type": "image/png",
       "purpose": "any"
