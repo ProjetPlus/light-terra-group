@@ -20,6 +20,7 @@ export type CompanyInfo = {
   facebook_url: string | null;
   linkedin_url: string | null;
   instagram_url: string | null;
+  logo_url: string | null;
 };
 
 export type HeroSlide = {
