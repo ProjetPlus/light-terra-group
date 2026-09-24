@@ -16,7 +16,6 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
-          created_at: string
           description: string | null
           icon: string | null
           id: string
@@ -26,10 +25,8 @@ export type Database = {
           short_description: string
           slug: string
           title: string
-          updated_at: string
         }
         Insert: {
-          created_at?: string
           description?: string | null
           icon?: string | null
           id?: string
@@ -39,10 +36,8 @@ export type Database = {
           short_description: string
           slug: string
           title: string
-          updated_at?: string
         }
         Update: {
-          created_at?: string
           description?: string | null
           icon?: string | null
           id?: string
@@ -52,37 +47,33 @@ export type Database = {
           short_description?: string
           slug?: string
           title?: string
-          updated_at?: string
         }
         Relationships: []
       }
       ai_knowledge: {
         Row: {
           answer: string
-          category: string | null
           created_at: string
           id: string
           is_active: boolean
+          position: number
           question: string
-          updated_at: string
         }
         Insert: {
           answer: string
-          category?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          position?: number
           question: string
-          updated_at?: string
         }
         Update: {
           answer?: string
-          category?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          position?: number
           question?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -91,7 +82,6 @@ export type Database = {
           address: string | null
           city: string | null
           country: string | null
-          created_at: string
           description: string | null
           email: string | null
           facebook_url: string | null
@@ -113,7 +103,6 @@ export type Database = {
           address?: string | null
           city?: string | null
           country?: string | null
-          created_at?: string
           description?: string | null
           email?: string | null
           facebook_url?: string | null
@@ -122,7 +111,7 @@ export type Database = {
           latitude?: number | null
           linkedin_url?: string | null
           longitude?: number | null
-          name?: string
+          name: string
           opening_hours?: string | null
           phone_primary?: string | null
           phone_secondary?: string | null
@@ -135,7 +124,6 @@ export type Database = {
           address?: string | null
           city?: string | null
           country?: string | null
-          created_at?: string
           description?: string | null
           email?: string | null
           facebook_url?: string | null
@@ -157,7 +145,6 @@ export type Database = {
       }
       hero_slides: {
         Row: {
-          created_at: string
           cta_label: string | null
           cta_url: string | null
           duration_ms: number
@@ -167,10 +154,8 @@ export type Database = {
           position: number
           subtitle: string | null
           title: string | null
-          updated_at: string
         }
         Insert: {
-          created_at?: string
           cta_label?: string | null
           cta_url?: string | null
           duration_ms?: number
@@ -180,10 +165,8 @@ export type Database = {
           position?: number
           subtitle?: string | null
           title?: string | null
-          updated_at?: string
         }
         Update: {
-          created_at?: string
           cta_label?: string | null
           cta_url?: string | null
           duration_ms?: number
@@ -193,36 +176,47 @@ export type Database = {
           position?: number
           subtitle?: string | null
           title?: string | null
-          updated_at?: string
         }
         Relationships: []
       }
       intro_videos: {
         Row: {
           created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          description: string | null
           id: string
           is_active: boolean
           label: string
+          placement: string
           position: number
-          updated_at: string
+          title: string | null
           video_url: string
         }
         Insert: {
           created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           label: string
+          placement?: string
           position?: number
-          updated_at?: string
+          title?: string | null
           video_url: string
         }
         Update: {
           created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           label?: string
+          placement?: string
           position?: number
-          updated_at?: string
+          title?: string | null
           video_url?: string
         }
         Relationships: []
@@ -237,7 +231,6 @@ export type Database = {
           position: number
           poster_url: string | null
           title: string | null
-          updated_at: string
           url: string
         }
         Insert: {
@@ -249,7 +242,6 @@ export type Database = {
           position?: number
           poster_url?: string | null
           title?: string | null
-          updated_at?: string
           url: string
         }
         Update: {
@@ -261,7 +253,6 @@ export type Database = {
           position?: number
           poster_url?: string | null
           title?: string | null
-          updated_at?: string
           url?: string
         }
         Relationships: []
@@ -283,7 +274,6 @@ export type Database = {
           request_type: string
           status: string
           subject: string | null
-          updated_at: string
         }
         Insert: {
           admin_reply?: string | null
@@ -298,10 +288,9 @@ export type Database = {
           phone?: string | null
           project_type?: string | null
           replied_at?: string | null
-          request_type?: string
+          request_type: string
           status?: string
           subject?: string | null
-          updated_at?: string
         }
         Update: {
           admin_reply?: string | null
@@ -319,7 +308,6 @@ export type Database = {
           request_type?: string
           status?: string
           subject?: string | null
-          updated_at?: string
         }
         Relationships: []
       }
@@ -335,7 +323,6 @@ export type Database = {
           published_at: string | null
           slug: string
           title: string
-          updated_at: string
           view_count: number
         }
         Insert: {
@@ -349,7 +336,6 @@ export type Database = {
           published_at?: string | null
           slug: string
           title: string
-          updated_at?: string
           view_count?: number
         }
         Update: {
@@ -363,64 +349,33 @@ export type Database = {
           published_at?: string | null
           slug?: string
           title?: string
-          updated_at?: string
           view_count?: number
-        }
-        Relationships: []
-      }
-      page_views: {
-        Row: {
-          created_at: string
-          device: string | null
-          id: string
-          path: string
-          referrer: string | null
-        }
-        Insert: {
-          created_at?: string
-          device?: string | null
-          id?: string
-          path: string
-          referrer?: string | null
-        }
-        Update: {
-          created_at?: string
-          device?: string | null
-          id?: string
-          path?: string
-          referrer?: string | null
         }
         Relationships: []
       }
       partners: {
         Row: {
-          created_at: string
           id: string
           is_active: boolean
           logo_url: string | null
           name: string
           position: number
-          updated_at: string
           website_url: string | null
         }
         Insert: {
-          created_at?: string
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name: string
           position?: number
-          updated_at?: string
           website_url?: string | null
         }
         Update: {
-          created_at?: string
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name?: string
           position?: number
-          updated_at?: string
           website_url?: string | null
         }
         Relationships: []
@@ -440,7 +395,6 @@ export type Database = {
           status: string
           summary: string | null
           title: string
-          updated_at: string
         }
         Insert: {
           category?: string | null
@@ -456,7 +410,6 @@ export type Database = {
           status?: string
           summary?: string | null
           title: string
-          updated_at?: string
         }
         Update: {
           category?: string | null
@@ -472,7 +425,6 @@ export type Database = {
           status?: string
           summary?: string | null
           title?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -487,7 +439,6 @@ export type Database = {
           message: string
           rating: number | null
           status: string
-          updated_at: string
         }
         Insert: {
           author_name: string
@@ -499,7 +450,6 @@ export type Database = {
           message: string
           rating?: number | null
           status?: string
-          updated_at?: string
         }
         Update: {
           author_name?: string
@@ -511,7 +461,6 @@ export type Database = {
           message?: string
           rating?: number | null
           status?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -525,7 +474,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
@@ -541,17 +490,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_admin: { Args: never; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "editor"
+      app_role: "admin" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -679,7 +621,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "editor"],
+      app_role: ["admin", "super_admin"],
     },
   },
 } as const
