@@ -87,7 +87,9 @@ function IntroVideoLoop() {
     if (!list.length) return;
     const first = refs[0].current;
     if (!first) return;
-    first.src = list[0].video_url;
+    const firstUrl = list.at(0)?.video_url;
+    if (!firstUrl) return;
+    first.src = firstUrl;
     first.preload = "auto";
     first.load();
     const play = () => void first.play().catch(() => undefined);
@@ -256,7 +258,8 @@ function VideoShowcase() {
   }, [list.length]);
 
   if (!list.length) return null;
-  const item = list[index] ?? list[0];
+  const item = list[index];
+  if (!item) return null;
 
   return (
     <section className="bg-muted/40 py-16 sm:py-20 lg:py-24">
