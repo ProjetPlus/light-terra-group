@@ -24,6 +24,7 @@ export const HEADER_OFFSET = "pt-[76px] lg:pt-[92px]";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { data: company } = useQuery(companyQuery);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => setOpen(false), [pathname]);
