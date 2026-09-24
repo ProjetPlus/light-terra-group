@@ -382,7 +382,7 @@ type Message = {
   created_at: string;
 };
 
-function DashboardOverview() {
+function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
   const queries = [
     ["Demandes", "messages"],
     ["Actualités", "news"],
@@ -561,7 +561,8 @@ function Info({ label, value, href }: { label: string; value: string; href?: str
 function CrudPanel({ def }: { def: TableDef }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Row | null>(null);
-  const [uploading, setUploading] = useState<string | null>(null);\n  const [statusFilter, setStatusFilter] = useState("tous");
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("tous");
   const queryKey = useMemo(() => ["admin", def.table], [def.table]);
   const { data, isLoading } = useQuery({
     queryKey,
@@ -572,7 +573,8 @@ function CrudPanel({ def }: { def: TableDef }) {
     },
   });
   const { data: activities } = useQuery(activitiesQuery);
-  const rows = data ?? [];\n  const visibleRows = def.table === "testimonials" && statusFilter !== "tous" ? rows.filter((r) => String(r.status ?? "") === statusFilter) : rows;
+  const rows = data ?? [];
+  const visibleRows = def.table === "testimonials" && statusFilter !== "tous" ? rows.filter((r) => String(r.status ?? "") === statusFilter) : rows;
   const categoryOptions = (activities ?? []).map((a) => a.title);
 
   const save = useMutation({
