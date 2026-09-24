@@ -614,7 +614,17 @@ function CrudPanel({ def }: { def: TableDef }) {
               <span className="font-medium">{f.label}</span>
               {f.kind === "textarea" ? <textarea rows={4} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })} />
               : f.kind === "boolean" ? <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={Boolean(editing[f.name])} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.checked })} /><span className="text-xs text-muted-foreground">{editing[f.name] ? "Activé" : "Désactivé"}</span></div>
-              : f.kind === "select" ? <select className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}><option value="">—</option>{(f.name === "category" ? categoryOptions : f.options ?? []).map((o) => <option key={o} value={o}>{o}</option>)}</select>
+              : f.kind === "select" ? <select className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}><option value="">—</option>{(f.name === "category" ? categoryOptions : f.options ?? []).map((o) => {
+  const optionLabel =
+    f.name === "placement"
+      ? o === "hero_intro"
+        ? "Hero — introduction / identité"
+        : o === "home_showcase"
+          ? "Accueil — carousel projets"
+          : o
+      : o;
+  return <option key={o} value={o}>{optionLabel}</option>;
+})}</select>
               : f.kind === "file" ? (
                 <div className="mt-2 rounded-md border border-dashed border-border p-4">
                   <input type="file" accept={f.accept ?? (def.table === "media_items" && editing.kind === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
