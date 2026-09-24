@@ -12,6 +12,12 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { LOGO_URL, SITE_URL, OG_IMAGE_URL } from "@/lib/media";
+
+const SITE_NAME = "LIGHT TERRA GROUP";
+const SITE_TITLE = "LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
+const SITE_DESCRIPTION =
+  "LIGHT TERRA GROUP : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification en Côte d'Ivoire.";
 
 function NotFoundComponent() {
   return (
@@ -63,7 +69,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground"
           >
             Go home
           </a>
@@ -78,21 +84,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "author", content: SITE_NAME },
+      { name: "application-name", content: SITE_NAME },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
+      { name: "theme-color", content: "#000000" },
+      { property: "og:site_name", content: SITE_NAME },
+      { property: "og:locale", content: "fr_CI" },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:image:width", content: "1536" },
+      { property: "og:image:height", content: "1024" },
+      { property: "og:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+      { name: "twitter:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: SITE_URL },
+      { rel: "icon", href: LOGO_URL, type: "image/png" },
+      { rel: "shortcut icon", href: LOGO_URL, type: "image/png" },
+      { rel: "apple-touch-icon", href: LOGO_URL },
     ],
   }),
   shellComponent: RootShell,
@@ -102,10 +121,38 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: OG_IMAGE_URL,
+    description: SITE_DESCRIPTION,
+    telephone: "+225 07 49 22 47 22",
+    email: "contact@lightterragroup.com",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Cocody Akouédo extension sud-est, Lot 637, îlot 60",
+      addressLocality: "Abidjan",
+      addressCountry: "CI",
+    },
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    inLanguage: "fr-CI",
+  };
+
   return (
-    <html lang="fr">
+    <html lang="fr-CI">
       <head>
         <HeadContent />
+        <script type="application/ld+json">{JSON.stringify(organizationJsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(websiteJsonLd)}</script>
       </head>
       <body>
         {children}
@@ -120,7 +167,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
