@@ -115,13 +115,18 @@ const TABLES: TableDef[] = [
     ],
   },
   {
-    key: "intro_videos", label: "Vidéo d'accueil", table: "intro_videos",
+    key: "intro_videos", label: "Vidéos accueil", table: "intro_videos",
     order: { column: "position", ascending: true },
-    columns: ["label", "position", "is_active"], create: true,
+    columns: ["label", "placement", "title", "position", "is_active"], create: true,
     fields: [
-      { name: "label", label: "Nom", kind: "text", required: true },
+      { name: "label", label: "Nom interne", kind: "text", required: true },
+      { name: "title", label: "Titre affiché", kind: "text" },
+      { name: "description", label: "Description", kind: "textarea" },
+      { name: "placement", label: "Emplacement", kind: "select", options: ["hero_intro", "home_showcase"] },
       { name: "video_url", label: "Vidéo", kind: "file", required: true, accept: "video/mp4,video/webm,video/quicktime" },
-      { name: "position", label: "Ordre", kind: "number" },
+      { name: "cta_label", label: "Bouton", kind: "text" },
+      { name: "cta_url", label: "Lien", kind: "text" },
+      { name: "position", label: "Ordre dans la section", kind: "number" },
       { name: "is_active", label: "Active", kind: "boolean" },
     ],
   },
@@ -228,7 +233,7 @@ function newRowFor(def: TableDef, rows: Row[]) {
   if (def.table === "projects") Object.assign(row, { position: first, status: "en_cours", is_published: false, is_featured: false });
   if (def.table === "partners") Object.assign(row, { position: first, is_active: true });
   if (def.table === "media_items") Object.assign(row, { kind: "photo", position: first, is_active: true });
-  if (def.table === "intro_videos") Object.assign(row, { position: first, is_active: true });
+  if (def.table === "intro_videos") Object.assign(row, { position: first, placement: "home_showcase", is_active: true });
   if (def.table === "hero_slides") Object.assign(row, { position: first, duration_ms: 6000, is_active: true });
   if (def.table === "activities") Object.assign(row, { position: first, is_active: true });
   if (def.table === "ai_knowledge") Object.assign(row, { position: first, is_active: true });
