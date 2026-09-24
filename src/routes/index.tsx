@@ -81,11 +81,12 @@ function IntroVideoLoop() {
   const [active, setActive] = useState(0);
   const [front, setFront] = useState(0);
   const [ready, setReady] = useState(false);
-  const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
+  const frontRef = useRef<HTMLVideoElement>(null);
+  const backRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!list.length) return;
-    const first = refs.at(0)?.current;
+    const first = frontRef.current;
     if (!first) return;
     const firstUrl = list.at(0)?.video_url;
     if (!firstUrl) return;
@@ -101,7 +102,7 @@ function IntroVideoLoop() {
 
   useEffect(() => {
     if (list.length < 2) return;
-    const hidden = refs.at(1 - front)?.current;
+    const hidden = front === 0 ? backRef.current : frontRef.current;
     const nextUrl = list[next]?.video_url;
     if (!hidden || !nextUrl) return;
 
@@ -121,7 +122,7 @@ function IntroVideoLoop() {
 
   useEffect(() => {
     if (list.length < 2 || !ready) return;
-    const current = refs.at(front)?.current;
+    const current = front === 0 ? frontRef.current : backRef.current;
     const hidden = refs[1 - front].current;
     if (!current || !hidden || !Number.isFinite(current.duration) || current.duration <= 0) return;
 
@@ -156,7 +157,7 @@ function IntroVideoLoop() {
       {[0, 1].map((slot) => (
         <video
           key={slot}
-          ref={refs[slot]}
+          ref={slot === 0 ? frontRef : backRef}
           className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out " + (slot === front ? "opacity-100" : "opacity-0")}
           muted
           playsInline
