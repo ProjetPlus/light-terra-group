@@ -68,6 +68,14 @@ jobs:
           out = Image.fromarray(rgba, "RGBA")
           out.save("public/media/logo-light-terra-transparent.png", optimize=True)
 
+          # Dedicated Open Graph raster: 1200x630, transparent, centered official logo.
+          og = Image.new("RGBA", (1200, 630), (0, 0, 0, 0))
+          logo = out
+          scale = min(1120 / logo.width, 570 / logo.height)
+          logo = logo.resize((round(logo.width * scale), round(logo.height * scale)), Image.Resampling.LANCZOS)
+          og.alpha_composite(logo, ((1200 - logo.width) // 2, (630 - logo.height) // 2))
+          og.save("public/media/og-light-terra.png", optimize=True)
+
           bbox = out.getbbox()
           if bbox:
               symbol = out.crop((120, 0, 1415, 640)).crop(out.crop((120, 0, 1415, 640)).getbbox())
@@ -87,7 +95,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/media/logo-light-terra-transparent.png public/media/favicon-light-terra.png
+          git add public/media/logo-light-terra-transparent.png public/media/favicon-light-terra.png public/media/og-light-terra.png
           git diff --cached --quiet && exit 0
           git commit -m "chore: generate transparent Light Terra brand assets [skip ci]"
           git push
