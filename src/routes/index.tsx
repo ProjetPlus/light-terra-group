@@ -408,11 +408,15 @@ function LatestNews() {
       <hr className="gold-rule mt-6 w-24" />
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {list.map((item) => (
-          <article key={item.id} className="rounded-lg border border-border bg-card p-6">
-            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(item.published_at ?? item.created_at)}</p>
-            <h3 className="mt-3 text-lg">{item.title}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.excerpt}</p>
-          </article>
+          <Link key={item.id} to="/actualites/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+            {item.image_url ? <img src={item.image_url} alt={item.title} loading="lazy" className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : null}
+            <div className="p-6">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(item.published_at ?? item.created_at)}</p>
+              <h3 className="mt-3 text-lg">{item.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.excerpt}</p>
+              <span className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">Lire l’actualité →</span>
+            </div>
+          </Link>
         ))}
       </div>
       <div className="mt-10"><Button asChild variant="outline"><Link to="/actualites">Toutes les actualités</Link></Button></div>
