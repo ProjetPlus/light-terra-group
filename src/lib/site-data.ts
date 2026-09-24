@@ -40,6 +40,11 @@ export type IntroVideo = {
   video_url: string;
   position: number;
   is_active: boolean;
+  placement: "hero_intro" | "home_showcase";
+  title: string | null;
+  description: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
 };
 
 export type Activity = {
