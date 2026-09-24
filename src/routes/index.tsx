@@ -53,41 +53,38 @@ function IntroVideoLoop() {
   const [ready, setReady] = useState(false);
   const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
 
+  useEffect(() => {
+    if (!list.length) return;
+    const first = refs[0].current;
+    if (!first) return;
+    first.src = list[0].video_url;
+    first.preload = "auto";
+    first.load();
+    const play = () => void first.play().catch(() => undefined);
+    first.addEventListener("canplay", play, { once: true });
+    return () => first.removeEventListener("canplay", play);
+  }, [list]);
+
   const next = list.length > 1 ? (active + 1) % list.length : active;
 
   useEffect(() => {
-    if (!list.length) return;
-    const current = refs[front].current;
+    if (list.length < 2) return;
     const hidden = refs[1 - front].current;
-    const currentUrl = list[active]?.video_url;
     const nextUrl = list[next]?.video_url;
-    if (!current || !hidden || !currentUrl) return;
+    if (!hidden || !nextUrl) return;
 
     setReady(false);
-    current.src = currentUrl;
-    current.preload = "auto";
-    current.load();
+    hidden.src = nextUrl;
+    hidden.preload = "auto";
+    hidden.load();
 
-    const prepare = () => {
-      void current.play().catch(() => undefined);
+    const markReady = () => setReady(true);
+    hidden.addEventListener("canplay", markReady, { once: true });
+    hidden.addEventListener("loadeddata", markReady, { once: true });
+    return () => {
+      hidden.removeEventListener("canplay", markReady);
+      hidden.removeEventListener("loadeddata", markReady);
     };
-    current.addEventListener("canplay", prepare, { once: true });
-
-    if (nextUrl && list.length > 1) {
-      hidden.src = nextUrl;
-      hidden.preload = "auto";
-      hidden.load();
-      const markReady = () => setReady(true);
-      hidden.addEventListener("canplay", markReady, { once: true });
-      hidden.addEventListener("loadeddata", markReady, { once: true });
-      return () => {
-        current.removeEventListener("canplay", prepare);
-        hidden.removeEventListener("canplay", markReady);
-        hidden.removeEventListener("loadeddata", markReady);
-      };
-    }
-
-    return () => current.removeEventListener("canplay", prepare);
   }, [active, front, next, list]);
 
   useEffect(() => {
@@ -96,7 +93,7 @@ function IntroVideoLoop() {
     const hidden = refs[1 - front].current;
     if (!current || !hidden || !Number.isFinite(current.duration) || current.duration <= 0) return;
 
-    const lead = 0.8;
+    const lead = 0.7;
     const remaining = Math.max(0.25, current.duration - current.currentTime - lead);
     const timer = window.setTimeout(() => {
       void hidden.play().catch(() => undefined);
