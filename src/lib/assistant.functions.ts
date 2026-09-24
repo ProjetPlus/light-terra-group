@@ -6,9 +6,9 @@ const schema = z.object({
   messages: z.array(
     z.object({
       role: z.enum(["user", "assistant"]),
-      content: z.string().min(1).max(2000),
+      content: z.string().trim().min(1).max(1200),
     }),
-  ).min(1).max(20),
+  ).min(1).max(12),
 });
 
 type KnowledgeRow = { question: string; answer: string; is_active: boolean; position: number };
