@@ -413,7 +413,7 @@ function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
     </div>
   );
 }
-function DashboardCard({ label, table, onClick }: { label: string; table: string; onClick?: () => void }) {
+function DashboardCard({ label, table, onClick }: { label: string; table: TableDef["table"] | "messages"; onClick?: () => void }) {
   const { data } = useQuery({
     queryKey: ["admin", "count", table],
     queryFn: async () => {
