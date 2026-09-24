@@ -42,7 +42,7 @@ type FieldDef = {
 type TableDef = {
   key: string;
   label: string;
-  table: "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos";
+  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info";
   order: { column: string; ascending: boolean };
   columns: string[];
   fields: FieldDef[];
@@ -50,6 +50,59 @@ type TableDef = {
 };
 
 const TABLES: TableDef[] = [
+  {
+    key: "hero_slides", label: "Accueil — visuels", table: "hero_slides",
+    order: { column: "position", ascending: true },
+    columns: ["title", "position", "is_active"], create: true,
+    fields: [
+      { name: "title", label: "Titre", kind: "text" },
+      { name: "subtitle", label: "Sous-titre", kind: "textarea" },
+      { name: "image_url", label: "Visuel", kind: "file", required: true, accept: "image/*" },
+      { name: "cta_label", label: "Bouton", kind: "text" },
+      { name: "cta_url", label: "Lien du bouton", kind: "text" },
+      { name: "duration_ms", label: "Durée (ms)", kind: "number" },
+      { name: "position", label: "Ordre", kind: "number" },
+      { name: "is_active", label: "Actif", kind: "boolean" },
+    ],
+  },
+  {
+    key: "activities", label: "Pôles d'activité", table: "activities",
+    order: { column: "position", ascending: true },
+    columns: ["title", "slug", "position", "is_active"], create: true,
+    fields: [
+      { name: "title", label: "Titre", kind: "text", required: true },
+      { name: "slug", label: "Identifiant", kind: "text", required: true },
+      { name: "short_description", label: "Résumé", kind: "textarea", required: true },
+      { name: "description", label: "Description", kind: "textarea" },
+      { name: "icon", label: "Icône", kind: "text" },
+      { name: "image_url", label: "Image", kind: "file", accept: "image/*" },
+      { name: "position", label: "Ordre", kind: "number" },
+      { name: "is_active", label: "Actif", kind: "boolean" },
+    ],
+  },
+
+  {
+    key: "company_info", label: "Informations du groupe", table: "company_info",
+    order: { column: "updated_at", ascending: false },
+    columns: ["name", "email", "phone_primary", "city"], create: true,
+    fields: [
+      { name: "name", label: "Nom", kind: "text", required: true },
+      { name: "slogan", label: "Slogan", kind: "text", required: true },
+      { name: "description", label: "Description", kind: "textarea" },
+      { name: "phone_primary", label: "Téléphone principal", kind: "text" },
+      { name: "phone_secondary", label: "Téléphone secondaire", kind: "text" },
+      { name: "whatsapp", label: "WhatsApp", kind: "text" },
+      { name: "email", label: "E-mail", kind: "text" },
+      { name: "address", label: "Adresse", kind: "text" },
+      { name: "city", label: "Ville", kind: "text" },
+      { name: "country", label: "Pays", kind: "text" },
+      { name: "opening_hours", label: "Horaires", kind: "text" },
+      { name: "website", label: "Site web", kind: "text" },
+      { name: "facebook_url", label: "Facebook", kind: "text" },
+      { name: "linkedin_url", label: "LinkedIn", kind: "text" },
+      { name: "instagram_url", label: "Instagram", kind: "text" },
+    ],
+  },
   {
     key: "intro_videos", label: "Vidéo d'accueil", table: "intro_videos",
     order: { column: "position", ascending: true },
