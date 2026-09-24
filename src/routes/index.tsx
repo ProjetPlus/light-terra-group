@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -58,17 +58,26 @@ export const Route = createFileRoute("/")({
 function IntroVideoLoop() {
   const { data: videos } = useQuery(introVideosQuery);
   const { data: media } = useQuery(mediaItemsQuery);
-  const list = videos?.length
-    ? videos
-    : (media ?? [])
-        .filter((item) => item.kind === "video" && item.url)
-        .map((item) => ({
-          id: item.id,
-          label: item.title ?? "Vidéo",
-          video_url: item.url,
-          position: item.position,
-          is_active: item.is_active,
-        }));
+  const list = useMemo(
+    () =>
+      videos?.length
+        ? videos
+        : (media ?? [])
+            .filter((item) => item.kind === "video" && item.url)
+            .map((item) => ({
+              id: item.id,
+              label: item.title ?? "Vidéo",
+              video_url: item.url,
+              position: item.position,
+              is_active: item.is_active,
+              placement: "hero_intro" as const,
+              title: item.title,
+              description: item.description,
+              cta_label: null,
+              cta_url: null,
+            })),
+    [videos, media],
+  );
   const [active, setActive] = useState(0);
   const [front, setFront] = useState(0);
   const [ready, setReady] = useState(false);
