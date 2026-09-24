@@ -22,6 +22,7 @@ import {
   formatDateFr,
   heroSlidesQuery,
   introVideosQuery,
+  mediaItemsQuery,
   newsListQuery,
   projectsQuery,
 } from "@/lib/site-data";
@@ -47,7 +48,18 @@ export const Route = createFileRoute("/")({
 /** Lecture en boucle continue des séquences vidéo, sans coupure visible. */
 function IntroVideoLoop() {
   const { data: videos } = useQuery(introVideosQuery);
-  const list = videos ?? [];
+  const { data: media } = useQuery(mediaItemsQuery);
+  const list = videos?.length
+    ? videos
+    : (media ?? [])
+        .filter((item) => item.kind === "video" && item.url)
+        .map((item) => ({
+          id: item.id,
+          label: item.title ?? "Vidéo",
+          video_url: item.url,
+          position: item.position,
+          is_active: item.is_active,
+        }));
   const [active, setActive] = useState(0);
   const [front, setFront] = useState(0);
   const [ready, setReady] = useState(false);
@@ -104,7 +116,20 @@ function IntroVideoLoop() {
     return () => window.clearTimeout(timer);
   }, [active, front, next, ready, list]);
 
-  if (!list.length) return null;
+  if (!list.length) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-ink shadow-elevated">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.22),transparent_35%),linear-gradient(135deg,#111,#000)]" />
+        <div className="relative flex h-full items-center justify-center p-6 text-center">
+          <div>
+            <p className="eyebrow text-gold">LIGHT TERRA GROUP</p>
+            <p className="mt-3 font-display text-xl text-white sm:text-2xl">Notre savoir-faire en mouvement</p>
+            <p className="mt-2 text-sm text-white/60">La vidéo de présentation sera affichée ici dès qu’elle est ajoutée depuis l’administration.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
