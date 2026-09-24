@@ -142,28 +142,32 @@ export const heroSlidesQuery = queryOptions({
 
 export const introVideosQuery = queryOptions({
   queryKey: ["intro_videos", "hero_intro"],
-  queryFn: async (): Promise<IntroVideo[]> =>
-    unwrap(
+  queryFn: async (): Promise<IntroVideo[]> => {
+    const rows = unwrap(
       await supabase
         .from("intro_videos")
         .select("*")
         .eq("is_active", true)
         .eq("placement", "hero_intro")
         .order("position", { ascending: true }),
-    ),
+    );
+    return rows.map((row) => ({ ...row, placement: row.placement as IntroVideo["placement"] }));
+  },
 });
 
 export const showcaseVideosQuery = queryOptions({
   queryKey: ["intro_videos", "home_showcase"],
-  queryFn: async (): Promise<IntroVideo[]> =>
-    unwrap(
+  queryFn: async (): Promise<IntroVideo[]> => {
+    const rows = unwrap(
       await supabase
         .from("intro_videos")
         .select("*")
         .eq("is_active", true)
         .eq("placement", "home_showcase")
         .order("position", { ascending: true }),
-    ),
+    );
+    return rows.map((row) => ({ ...row, placement: row.placement as IntroVideo["placement"] }));
+  },
 });
 
 export const activitiesQuery = queryOptions({
