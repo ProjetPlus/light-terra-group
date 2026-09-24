@@ -36,7 +36,8 @@ function localReply(question: string, ctx: SiteContext) {
     })
     .sort((a, b) => b.score - a.score);
 
-  if (scored[0]?.score > 0) return scored[0].item.answer;
+  const best = scored[0];
+  if (best && best.score > 0) return best.item.answer;
 
   if (/activit|service|fait|metier|domaine|secteur/.test(nq) && ctx.activities.length) {
     return "LIGHT TERRA GROUP intervient notamment dans " +
@@ -59,10 +60,10 @@ function localReply(question: string, ctx: SiteContext) {
   const company = ctx.company ?? {};
   if (/contact|telephone|whatsapp|email|mail|joindre|adresse/.test(nq)) {
     const parts = [
-      company.phone_primary ? "Téléphone : " + company.phone_primary : "",
-      company.whatsapp ? "WhatsApp : " + company.whatsapp : "",
-      company.email ? "E-mail : " + company.email : "",
-      company.address ? "Adresse : " + [company.address, company.city, company.country].filter(Boolean).join(", ") : "",
+      company["phone_primary"] ? "Téléphone : " + company["phone_primary"] : "",
+      company["whatsapp"] ? "WhatsApp : " + company["whatsapp"] : "",
+      company["email"] ? "E-mail : " + company["email"] : "",
+      company["address"] ? "Adresse : " + [company["address"], company["city"], company["country"]].filter(Boolean).join(", ") : "",
     ].filter(Boolean);
     if (parts.length) return parts.join(" — ");
   }
