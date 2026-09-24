@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
+import { Link } from "@tanstack/react-router";
 import { formatDateFr, newsListQuery } from "@/lib/site-data";
 
 const title = "Actualités — LIGHT TERRA GROUP";
@@ -55,11 +56,27 @@ function Page() {
                 </p>
                 <h2 className="mt-3 text-2xl">{item.title}</h2>
                 <p className="mt-3 leading-relaxed text-muted-foreground">{item.excerpt}</p>
-                {item.content ? (
-                  <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                    {item.content}
-                  </p>
+                {item.video_url ? (
+                  <div className="mt-5 overflow-hidden rounded-xl bg-black">
+                    <video
+                      controls
+                      muted
+                      playsInline
+                      preload="metadata"
+                      poster={item.video_poster_url ?? item.image_url ?? undefined}
+                      className="aspect-video w-full object-cover"
+                    >
+                      <source src={item.video_url} type="video/mp4" />
+                    </video>
+                  </div>
                 ) : null}
+                <Link
+                  to="/actualites/$slug"
+                  params={{ slug: item.slug }}
+                  className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4"
+                >
+                  Lire l’actualité →
+                </Link>
               </div>
             </article>
           ))}
