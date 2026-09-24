@@ -23,6 +23,7 @@ import {
   heroSlidesQuery,
   introVideosQuery,
   mediaItemsQuery,
+  showcaseVideosQuery,
   newsListQuery,
   projectsQuery,
 } from "@/lib/site-data";
@@ -253,6 +254,85 @@ export const ACTIVITY_ICONS: Record<string, typeof Building2> = {
   "key-round": KeyRound,
 };
 
+
+function VideoShowcase() {
+  const { data: videos } = useQuery(showcaseVideosQuery);
+  const list = videos ?? [];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (list.length < 2) return;
+    const timer = window.setInterval(() => setIndex((i) => (i + 1) % list.length), 8500);
+    return () => window.clearInterval(timer);
+  }, [list.length]);
+
+  if (!list.length) return null;
+  const item = list[index] ?? list[0];
+
+  return (
+    <section className="bg-muted/40 py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-5 lg:px-8">
+        <div className="max-w-3xl">
+          <p className="eyebrow">Projets en images</p>
+          <h2 className="mt-3 text-3xl lg:text-4xl">Découvrez nos opportunités et réalisations</h2>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            Des images aériennes et immersives pour découvrir les territoires et projets que nous accompagnons.
+          </p>
+        </div>
+
+        <div className="relative mt-10 overflow-hidden rounded-2xl border border-border bg-ink shadow-elevated">
+          <div className="aspect-video sm:aspect-[16/8]">
+            {list.map((video, i) => (
+              <video
+                key={video.id}
+                src={video.video_url}
+                className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === index ? "opacity-100" : "opacity-0")}
+                muted
+                playsInline
+                autoPlay={i === index}
+                loop
+                preload={i === index ? "auto" : "metadata"}
+                aria-hidden={i !== index}
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                {item.label}
+              </p>
+              <h3 className="mt-2 max-w-2xl text-2xl text-white sm:text-3xl lg:text-4xl">
+                {item.title || item.label}
+              </h3>
+              {item.description ? (
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base">{item.description}</p>
+              ) : null}
+            </div>
+          </div>
+
+          {list.length > 1 ? (
+            <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-between px-3 sm:px-5">
+              <button type="button" onClick={() => setIndex((i) => (i - 1 + list.length) % list.length)} className="rounded-full bg-black/45 px-3 py-2 text-xl text-white backdrop-blur transition hover:bg-black/70" aria-label="Vidéo précédente">‹</button>
+              <button type="button" onClick={() => setIndex((i) => (i + 1) % list.length)} className="rounded-full bg-black/45 px-3 py-2 text-xl text-white backdrop-blur transition hover:bg-black/70" aria-label="Vidéo suivante">›</button>
+            </div>
+          ) : null}
+
+          <div className="absolute bottom-4 right-5 flex gap-2">
+            {list.map((video, i) => (
+              <button
+                key={video.id}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Afficher ${video.title || video.label}`}
+                className={"h-1.5 rounded-full transition-all " + (i === index ? "w-10 bg-gold" : "w-4 bg-white/45 hover:bg-white/75")}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Activities() {
   const { data: activities } = useQuery(activitiesQuery);
   if (!activities || activities.length === 0) return null;
@@ -399,6 +479,7 @@ function Index() {
       <main className="flex-1">
         <Hero />
         <Activities />
+        <VideoShowcase />
         <FeaturedProjects />
         <LatestNews />
         <CallToAction />
