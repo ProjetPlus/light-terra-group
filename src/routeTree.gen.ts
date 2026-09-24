@@ -19,7 +19,6 @@ import { Route as MeRouteImport } from './routes/me'
 import { Route as ProjetsRouteImport } from './routes/projets'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TemoignagesRouteImport } from './routes/temoignages'
-import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,11 +70,6 @@ const TemoignagesRoute = TemoignagesRouteImport.update({
   path: '/temoignages',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicBootstrapAdminRoute = ApiPublicBootstrapAdminRouteImport.update({
-  id: '/api/public/bootstrap-admin',
-  path: '/api/public/bootstrap-admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -88,7 +82,6 @@ export interface FileRoutesByFullPath {
   '/projets': typeof ProjetsRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
-  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,7 +94,6 @@ export interface FileRoutesByTo {
   '/projets': typeof ProjetsRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
-  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -245,13 +237,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TemoignagesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/bootstrap-admin': {
-      id: '/api/public/bootstrap-admin'
-      path: '/api/public/bootstrap-admin'
-      fullPath: '/api/public/bootstrap-admin'
-      preLoaderRoute: typeof ApiPublicBootstrapAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -266,7 +251,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProjetsRoute: ProjetsRoute,
   ServicesRoute: ServicesRoute,
   TemoignagesRoute: TemoignagesRoute,
-  ApiPublicBootstrapAdminRoute: ApiPublicBootstrapAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
