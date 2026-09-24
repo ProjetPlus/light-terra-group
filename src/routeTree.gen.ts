@@ -107,7 +107,6 @@ export interface FileRoutesById {
   '/projets': typeof ProjetsRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
-  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,7 +121,6 @@ export interface FileRouteTypes {
     | '/projets'
     | '/services'
     | '/temoignages'
-    | '/api/public/bootstrap-admin'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -135,7 +133,6 @@ export interface FileRouteTypes {
     | '/projets'
     | '/services'
     | '/temoignages'
-    | '/api/public/bootstrap-admin'
   id:
     | '__root__'
     | '/'
@@ -148,7 +145,6 @@ export interface FileRouteTypes {
     | '/projets'
     | '/services'
     | '/temoignages'
-    | '/api/public/bootstrap-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -162,7 +158,6 @@ export interface RootRouteChildren {
   ProjetsRoute: typeof ProjetsRoute
   ServicesRoute: typeof ServicesRoute
   TemoignagesRoute: typeof TemoignagesRoute
-  ApiPublicBootstrapAdminRoute: typeof ApiPublicBootstrapAdminRoute
 }
 
 declare module '@tanstack/react-router' {
