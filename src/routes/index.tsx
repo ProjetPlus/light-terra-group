@@ -249,18 +249,25 @@ export const ACTIVITY_ICONS: Record<string, typeof Building2> = {
 
 function VideoShowcase() {
   const { data: videos } = useQuery(showcaseVideosQuery);
-  const list = videos ?? [];
+  const { data: projects } = useQuery(projectsQuery);
   const [index, setIndex] = useState(0);
+  const videoList = videos ?? [];
+  const projectList = (projects ?? []).slice(0, 4);
 
   useEffect(() => {
-    if (list.length < 2) return;
-    const timer = window.setInterval(() => setIndex((i) => (i + 1) % list.length), 8500);
+    const length = videoList.length || projectList.length;
+    if (length < 2) return;
+    const timer = window.setInterval(() => setIndex((i) => (i + 1) % length), 8500);
     return () => window.clearInterval(timer);
-  }, [list.length]);
+  }, [videoList.length, projectList.length]);
 
-  if (!list.length) return null;
-  const item = list[index];
-  if (!item) return null;
+  if (!videoList.length && !projectList.length) return null;
+
+  const useVideos = videoList.length > 0;
+  const length = useVideos ? videoList.length : projectList.length;
+  const safeIndex = index % length;
+  const videoItem = useVideos ? videoList[safeIndex] : null;
+  const projectItem = !useVideos ? projectList[safeIndex] : null;
 
   return (
     <section className="bg-muted/40 py-16 sm:py-20 lg:py-24">
@@ -269,45 +276,65 @@ function VideoShowcase() {
           <p className="eyebrow">Projets en images</p>
           <h2 className="mt-3 text-3xl lg:text-4xl">Découvrez nos opportunités et réalisations</h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Des images aériennes et immersives pour découvrir les territoires et projets que nous accompagnons.
+            Présentations immersives, vues aériennes et contenus de projet. Les vidéos ajoutées depuis l’administration prennent automatiquement la place des visuels de secours.
           </p>
         </div>
 
         <div className="relative mt-10 overflow-hidden rounded-2xl border border-border bg-ink shadow-elevated">
           <div className="relative aspect-video sm:aspect-[16/8]">
-            {list.map((video, i) => (
-              <video
-                key={video.id}
-                src={video.video_url}
-                className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === index ? "opacity-100" : "opacity-0")}
-                muted
-                playsInline
-                autoPlay={i === index}
-                loop
-                preload={i === index ? "auto" : "metadata"}
-                aria-hidden={i !== index}
-              />
-            ))}
+            {useVideos
+              ? videoList.map((video, i) => (
+                  <video
+                    key={video.id}
+                    src={video.video_url}
+                    className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === safeIndex ? "opacity-100" : "opacity-0")}
+                    muted
+                    playsInline
+                    autoPlay={i === safeIndex}
+                    loop
+                    preload={i === safeIndex ? "auto" : "metadata"}
+                    aria-hidden={i !== safeIndex}
+                  />
+                ))
+              : projectList.map((project, i) => (
+                  <img
+                    key={project.id}
+                    src={project.image_url ?? "/media/hero1.jpg"}
+                    alt={project.title}
+                    className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === safeIndex ? "opacity-100" : "opacity-0")}
+                    aria-hidden={i !== safeIndex}
+                  />
+                ))}
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{item.label}</p>
-              <h3 className="mt-2 max-w-2xl text-2xl text-white sm:text-3xl lg:text-4xl">{item.title || item.label}</h3>
-              {item.description ? <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base">{item.description}</p> : null}
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                {useVideos ? videoItem?.label : "Projet"}
+              </p>
+              <h3 className="mt-2 max-w-2xl text-2xl text-white sm:text-3xl lg:text-4xl">
+                {useVideos ? (videoItem?.title || videoItem?.label) : projectItem?.title}
+              </h3>
+              {(useVideos ? videoItem?.description : projectItem?.summary) ? (
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base">
+                  {useVideos ? videoItem?.description : projectItem?.summary}
+                </p>
+              ) : null}
             </div>
           </div>
 
-          {list.length > 1 ? (
+          {length > 1 ? (
             <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-between px-3 sm:px-5">
-              <button type="button" onClick={() => setIndex((i) => (i - 1 + list.length) % list.length)} className="rounded-full bg-black/45 px-3 py-2 text-xl text-white backdrop-blur transition hover:bg-black/70" aria-label="Vidéo précédente">‹</button>
-              <button type="button" onClick={() => setIndex((i) => (i + 1) % list.length)} className="rounded-full bg-black/45 px-3 py-2 text-xl text-white backdrop-blur transition hover:bg-black/70" aria-label="Vidéo suivante">›</button>
+              <button type="button" onClick={() => setIndex((i) => (i - 1 + length) % length)} className="rounded-full bg-black/45 px-3 py-2 text-xl text-white backdrop-blur transition hover:bg-black/70" aria-label="Élément précédent">‹</button>
+              <button type="button" onClick={() => setIndex((i) => (i + 1) % length)} className="rounded-full bg-black/45 px-3 py-2 text-xl text-white backdrop-blur transition hover:bg-black/70" aria-label="Élément suivant">›</button>
             </div>
           ) : null}
 
-          <div className="absolute bottom-4 right-5 flex gap-2">
-            {list.map((video, i) => (
-              <button key={video.id} type="button" onClick={() => setIndex(i)} aria-label={`Afficher ${video.title || video.label}`} className={"h-1.5 rounded-full transition-all " + (i === index ? "w-10 bg-gold" : "w-4 bg-white/45 hover:bg-white/75")} />
-            ))}
-          </div>
+          {length > 1 ? (
+            <div className="absolute bottom-4 right-5 flex gap-2">
+              {Array.from({ length }).map((_, i) => (
+                <button key={i} type="button" onClick={() => setIndex(i)} aria-label={`Afficher l’élément ${i + 1}`} className={"h-1.5 rounded-full transition-all " + (i === safeIndex ? "w-10 bg-gold" : "w-4 bg-white/45 hover:bg-white/75")} />
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
