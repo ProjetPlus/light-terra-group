@@ -86,6 +86,8 @@ export type NewsItem = {
   is_published: boolean;
   view_count: number;
   created_at: string;
+  video_url: string | null;
+  video_poster_url: string | null;
 };
 
 export type Partner = {
