@@ -1,0 +1,93 @@
+name: Generate transparent brand assets
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  brand-assets:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install image tooling
+        run: python -m pip install --disable-pip-version-check pillow numpy
+
+      - name: Generate transparent logo and favicon
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          from collections import deque
+          import numpy as np
+          from PIL import Image, ImageFilter
+
+          src = Path("public/media/logo-light-terra.png")
+          if not src.exists():
+              raise SystemExit(f"Missing source logo: {src}")
+
+          image = Image.open(src).convert("RGB")
+          rgb = np.asarray(image)
+          near_black = np.all(rgb < 38, axis=2)
+          h, w = near_black.shape
+          background = np.zeros((h, w), dtype=bool)
+          q = deque()
+
+          for x in range(w):
+              if near_black[0, x]:
+                  q.append((0, x))
+              if near_black[h - 1, x]:
+                  q.append((h - 1, x))
+          for y in range(h):
+              if near_black[y, 0]:
+                  q.append((y, 0))
+              if near_black[y, w - 1]:
+                  q.append((y, w - 1))
+
+          while q:
+              y, x = q.popleft()
+              if background[y, x] or not near_black[y, x]:
+                  continue
+              background[y, x] = True
+              if y > 0: q.append((y - 1, x))
+              if y + 1 < h: q.append((y + 1, x))
+              if x > 0: q.append((y, x - 1))
+              if x + 1 < w: q.append((y, x + 1))
+
+          alpha = np.where(background, 0, 255).astype(np.uint8)
+          rgba = np.dstack([rgb, alpha])
+          out = Image.fromarray(rgba, "RGBA")
+          out.save("public/media/logo-light-terra-transparent.png", optimize=True)
+
+          bbox = out.getbbox()
+          if bbox:
+              symbol = out.crop((120, 0, 1415, 640)).crop(out.crop((120, 0, 1415, 640)).getbbox())
+              canvas = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
+              scale = min(472 / symbol.width, 472 / symbol.height)
+              symbol = symbol.resize(
+                  (round(symbol.width * scale), round(symbol.height * scale)),
+                  Image.Resampling.LANCZOS,
+              )
+              canvas.alpha_composite(symbol, ((512 - symbol.width) // 2, (512 - symbol.height) // 2))
+              canvas.save("public/media/favicon-light-terra.png", optimize=True)
+
+          print("Generated transparent Light Terra brand assets.")
+          PY
+
+      - name: Commit generated assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/media/logo-light-terra-transparent.png public/media/favicon-light-terra.png
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: generate transparent Light Terra brand assets [skip ci]"
+          git push
