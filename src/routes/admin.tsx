@@ -228,7 +228,7 @@ async function uploadSiteFile(file: File, folder: string) {
 
 function newRowFor(def: TableDef, rows: Row[]) {
   const row: Row = {};
-  const first = rows.length ? Math.min(...rows.map((r) => Number(r.position ?? 0))) - 1 : 0;
+  const first = rows.length ? Math.min(...rows.map((r) => Number(r["position"] ?? 0))) - 1 : 0;
   if (def.table === "news") Object.assign(row, { author: "LT Group", published_at: todayIsoDate(), is_published: false });
   if (def.table === "projects") Object.assign(row, { position: first, status: "en_cours", is_published: false, is_featured: false });
   if (def.table === "partners") Object.assign(row, { position: first, is_active: true });
@@ -574,7 +574,7 @@ function CrudPanel({ def }: { def: TableDef }) {
   });
   const { data: activities } = useQuery(activitiesQuery);
   const rows = data ?? [];
-  const visibleRows = def.table === "testimonials" && statusFilter !== "tous" ? rows.filter((r) => String(r.status ?? "") === statusFilter) : rows;
+  const visibleRows = def.table === "testimonials" && statusFilter !== "tous" ? rows.filter((r) => String(r["status"] ?? "") === statusFilter) : rows;
   const categoryOptions = (activities ?? []).map((a) => a.title);
 
   const save = useMutation({
@@ -583,13 +583,15 @@ function CrudPanel({ def }: { def: TableDef }) {
       const payload: Row = {};
       for (const f of def.fields) payload[f.name] = row[f.name] ?? null;
       for (const f of def.fields) if (f.required && (payload[f.name] === null || payload[f.name] === undefined || payload[f.name] === "")) throw new Error("Le champ « " + f.label + " » est obligatoire.");
-      if ((def.table === "news" || def.table === "projects") && !payload.slug) payload.slug = slugify(String(payload.title ?? ""));
-      if (def.table === "news") { payload.author = "LT Group"; if (!payload.published_at) payload.published_at = todayIsoDate(); }
+      if ((def.table === "news" || def.table === "projects") && !payload["slug"]) payload["slug"] = slugify(String(payload["title"] ?? ""));
+      if (def.table === "news") { payload["author"] = "LT Group"; if (!payload["published_at"]) payload["published_at"] = todayIsoDate(); }
       if (!id && (def.table === "projects" || def.table === "partners" || def.table === "media_items" || def.table === "intro_videos")) {
         const { data: firstRow } = await supabase.from(def.table).select("position").order("position", { ascending: true }).limit(1).maybeSingle();
-        payload.position = firstRow?.position == null ? 0 : Number(firstRow.position) - 1;
+        payload["position"] = firstRow?.position == null ? 0 : Number(firstRow["position"]) - 1;
       }
-      const result = id ? await supabase.from(def.table).update(payload).eq("id", id) : await supabase.from(def.table).insert(payload);
+      const result = id
+        ? await supabase.from(def.table).update(payload as never).eq("id", id)
+        : await supabase.from(def.table).insert(payload as never);
       if (result.error) throw new Error(result.error.message);
     },
     onSuccess: () => { toast.success("Enregistré."); setEditing(null); void qc.invalidateQueries({ queryKey }); },
@@ -610,7 +612,7 @@ function CrudPanel({ def }: { def: TableDef }) {
       </div>
       {editing ? (
         <form className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(editing); }}>
-          {def.table === "testimonials" ? <div className="sm:col-span-2 rounded-md bg-muted p-4 text-sm"><p className="font-medium">{String(editing.author_name ?? "")}</p><p className="mt-1 text-muted-foreground">{String(editing.message ?? "")}</p><p className="mt-2 text-xs text-muted-foreground">{String(editing.company ?? "")}</p></div> : null}
+          {def.table === "testimonials" ? <div className="sm:col-span-2 rounded-md bg-muted p-4 text-sm"><p className="font-medium">{String(editing["author_name"] ?? "")}</p><p className="mt-1 text-muted-foreground">{String(editing["message"] ?? "")}</p><p className="mt-2 text-xs text-muted-foreground">{String(editing["company"] ?? "")}</p></div> : null}
           {def.fields.map((f) => (
             <label key={f.name} className={f.kind === "textarea" || f.kind === "file" ? "text-sm sm:col-span-2" : "text-sm"}>
               <span className="font-medium">{f.label}</span>
@@ -629,7 +631,7 @@ function CrudPanel({ def }: { def: TableDef }) {
 })}</select>
               : f.kind === "file" ? (
                 <div className="mt-2 rounded-md border border-dashed border-border p-4">
-                  <input type="file" accept={f.accept ?? (def.table === "media_items" && editing.kind === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
+                  <input type="file" accept={f.accept ?? (def.table === "media_items" && editing["kind"] === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
                     try { const folder = def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
                     catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
@@ -638,7 +640,7 @@ function CrudPanel({ def }: { def: TableDef }) {
                   {uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}
                   {editing[f.name] ? <div className="mt-3 flex items-center gap-3 rounded-md bg-muted p-2"><span className="min-w-0 flex-1 truncate text-xs">{String(editing[f.name])}</span><button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-background" onClick={() => setEditing({ ...editing, [f.name]: null })} aria-label={"Supprimer le fichier " + f.label}><X className="h-4 w-4" /></button></div> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier sélectionné.</p>}
                 </div>
-              ) : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects") && f.name === "title" && !editing.id) next.slug = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
+              ) : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects") && f.name === "title" && !editing["id"]) next.slug = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
             </label>
           ))}
           <div className="flex gap-2 sm:col-span-2"><Button type="submit" variant="gold" disabled={save.isPending || uploading !== null}>{save.isPending ? "Enregistrement…" : "Enregistrer"}</Button><Button type="button" variant="outline" onClick={() => setEditing(null)}>Annuler</Button></div>
