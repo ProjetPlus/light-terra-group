@@ -217,6 +217,21 @@ function safeFileName(name: string) {
   return (base || "fichier") + "-" + crypto.randomUUID() + ext;
 }
 
+async function uploadBrandLogo(file: File) {
+  if (file.size > 10 * 1024 * 1024) throw new Error("Logo trop volumineux (10 Mo maximum).");
+  if (!/^image\/(jpeg|png|webp|svg\+xml)$/i.test(file.type)) throw new Error("Le logo doit être une image PNG, JPG, WEBP ou SVG.");
+  const paths = ["brand/logo.png"];
+  for (const path of paths) {
+    const { error } = await supabase.storage.from("site-media").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: true,
+      contentType: file.type,
+    });
+    if (error) throw new Error(error.message);
+  }
+  return supabase.storage.from("site-media").getPublicUrl("brand/logo.png").data.publicUrl;
+}
+
 async function uploadSiteFile(file: File, folder: string) {
   if (file.size > 50 * 1024 * 1024) throw new Error("Fichier trop volumineux (50 Mo maximum).");
   const allowed = /^(image\/(jpeg|png|webp|gif|svg\+xml)|video\/(mp4|webm|quicktime))$/i;
@@ -653,7 +668,13 @@ function CrudPanel({ def }: { def: TableDef }) {
                 <div className="mt-2 rounded-md border border-dashed border-border p-4">
                   <input type="file" accept={f.accept ?? (def.table === "media_items" && editing["kind"] === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
-                    try { const folder = def.table === "company_info" ? "brand" : def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media"; const url = await uploadSiteFile(file, folder); setEditing((current) => current ? { ...current, [f.name]: url } : current); toast.success("Fichier téléversé."); }
+                    try {
+                    const url = def.table === "company_info" && f.name === "logo_url"
+                      ? await uploadBrandLogo(file)
+                      : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
+                    setEditing((current) => current ? { ...current, [f.name]: url } : current);
+                    toast.success(def.table === "company_info" && f.name === "logo_url" ? "Logo officiel mis à jour. Il remplace le logo du site, l’OG et le favicon." : "Fichier téléversé.");
+                  }
                     catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
                     finally { setUploading(null); e.currentTarget.value = ""; }
                   }} />
