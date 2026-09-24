@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { LOGO_URL, SITE_URL, OG_IMAGE_URL } from "@/lib/media";
+import { FAVICON_URL, LOGO_URL, SITE_URL, OG_IMAGE_URL } from "@/lib/media";
 
 const SITE_NAME = "LIGHT TERRA GROUP";
 const SITE_TITLE = "LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
@@ -109,9 +109,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "canonical", href: SITE_URL },
-      { rel: "icon", href: LOGO_URL, type: "image/png" },
-      { rel: "shortcut icon", href: LOGO_URL, type: "image/png" },
-      { rel: "apple-touch-icon", href: LOGO_URL },
+      { rel: "icon", href: FAVICON_URL, type: "image/png" },
+      { rel: "shortcut icon", href: FAVICON_URL, type: "image/png" },
+      { rel: "apple-touch-icon", href: FAVICON_URL },
     ],
   }),
   shellComponent: RootShell,
