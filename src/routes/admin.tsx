@@ -240,6 +240,14 @@ async function convertPngToJpg(file: File) {
   return new File([blob], "logo.jpg", { type: "image/jpeg" });
 }
 
+async function generateJpgFromPublicLogo(url: string) {
+  const response = await fetch(url, { mode: "cors", cache: "no-store" });
+  if (!response.ok) throw new Error("Logo PNG inaccessible.");
+  const source = await response.blob();
+  const file = new File([source], "logo.png", { type: source.type || "image/png" });
+  return convertPngToJpg(file);
+}
+
 async function uploadBrandVariant(file: File, variant: "png" | "jpg") {
   if (file.size > 10 * 1024 * 1024) throw new Error("Logo trop volumineux (10 Mo maximum).");
   const expected = variant === "png" ? "image/png" : "image/jpeg";
@@ -286,6 +294,26 @@ function AdminPage() {
   const [tab, setTab] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: company } = useQuery(companyQuery);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!company?.id || company.logo_jpg_url || !company.logo_png_url) return;
+    let active = true;
+    void (async () => {
+      try {
+        const jpgFile = await generateJpgFromPublicLogo(company.logo_png_url!);
+        const jpgUrl = await uploadBrandVariant(jpgFile, "jpg");
+        if (!active) return;
+        const { error } = await supabase.from("company_info").update({ logo_jpg_url: jpgUrl }).eq("id", company.id);
+        if (error) throw new Error(error.message);
+        await queryClient.invalidateQueries({ queryKey: ["company_info"] });
+        toast.success("Version JPG du logo générée automatiquement.");
+      } catch {
+        // Le logo PNG reste utilisable ; l'administrateur peut aussi téléverser un JPG depuis Paramètres.
+      }
+    })();
+    return () => { active = false; };
+  }, [company?.id, company?.logo_jpg_url, company?.logo_png_url, queryClient]);
 
   useEffect(() => {
     let active = true;
