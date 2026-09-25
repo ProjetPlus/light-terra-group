@@ -370,7 +370,7 @@ function LatestNews() {
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {list.map((item) => (
           <Link key={item.id} to="/actualites/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
-            {item.cover_image_url || item.image_url || item.video_url ? <MediaPreview url={item.cover_image_url ?? item.image_url ?? item.video_url alt={item.title} poster={item.video_poster_url} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : null}
+            {item.cover_image_url || item.image_url || item.video_url ? <MediaPreview url={item.cover_image_url ?? item.image_url ?? item.video_url ?? ""} alt={item.title} poster={item.video_poster_url} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : null}
             <div className="p-6">
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(item.published_at ?? item.created_at)}</p>
               <h3 className="mt-3 text-lg">{item.title}</h3>
