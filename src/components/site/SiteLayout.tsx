@@ -32,10 +32,10 @@ export function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-secondary shadow-sm">
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3 lg:px-8">
-        <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="LIGHT TERRA GROUP — accueil">
+        <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="LT GROUP — accueil">
           <img
             src={company?.logo_png_url || company?.logo_url || LOGO_URL}
-            alt="Logo LIGHT TERRA GROUP"
+            alt="Logo LT GROUP"
             className="h-10 w-auto max-w-[190px] shrink-0 object-contain lg:h-12 lg:max-w-[230px]"
             width={600}
             height={400}
@@ -140,7 +140,7 @@ export function SiteFooter() {
           <div className="inline-block rounded-lg bg-secondary p-4 shadow-sm">
             <img
               src={company?.logo_jpg_url || company?.logo_url || LOGO_URL}
-              alt="Logo LIGHT TERRA GROUP"
+              alt="Logo LT GROUP"
               loading="lazy"
               className="h-14 w-auto max-w-[210px] object-contain sm:h-16"
               width={600}
@@ -149,7 +149,7 @@ export function SiteFooter() {
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-ink-foreground/70">
             {company?.description ??
-              "LIGHT TERRA GROUP valorise la terre et transforme les opportunités foncières en projets d'avenir."}
+              "LT GROUP valorise la terre et transforme les opportunités foncières en projets d'avenir."}
           </p>
         </div>
 
@@ -198,7 +198,7 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-ink-foreground/50 sm:flex-row lg:px-8">
           <p>
-            © {year} {company?.name ?? "LIGHT TERRA GROUP"} — Tous droits réservés.
+            © {year} {company?.name ?? "LT GROUP"} — Tous droits réservés.
           </p>
           <p className="uppercase tracking-[0.2em] text-gold/80">
             {company?.slogan ?? "Bâtir la terre, éclairer l'avenir"}
