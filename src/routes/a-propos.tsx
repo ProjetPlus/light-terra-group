@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Eye, Gem, Target, ShieldCheck, Workflow, MapPinned } from "lucide-react";
 
@@ -122,7 +122,7 @@ function Page() {
                   <div className="p-5">
                     <h3 className="text-base">{activity.title}</h3>
                     <p className="mt-2 text-sm text-muted-foreground">{activity.short_description}</p>
-                    <a href={`/activites/${activity.slug}`} className="mt-4 inline-flex text-sm font-semibold underline underline-offset-4">Découvrir →</a>
+                    <Link to="/activites/$slug" params={{ slug: activity.slug }} className="mt-4 inline-flex text-sm font-semibold underline underline-offset-4">Découvrir →</Link>
                   </div>
                 </li>
               ))}
