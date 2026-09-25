@@ -7,9 +7,9 @@ import { MediaPreview } from "@/components/site/MediaPreview";
 import { Button } from "@/components/ui/button";
 import { activitiesQuery } from "@/lib/site-data";
 
-const title = "Nos activités — LIGHT TERRA GROUP";
+const title = "Nos activités — LT GROUP";
 const description =
-  "Aménagement foncier, BTP, promotion immobilière, infrastructures électriques : découvrez les pôles d'activité de LIGHT TERRA GROUP.";
+  "Aménagement foncier, BTP, promotion immobilière, infrastructures électriques : découvrez les pôles d'activité de LT GROUP.";
 
 export const Route = createFileRoute("/activites")({
   head: () => ({
