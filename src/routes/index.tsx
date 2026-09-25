@@ -57,83 +57,57 @@ export const Route = createFileRoute("/")({
 /** Lecture en boucle continue des séquences vidéo, sans coupure visible. */
 function IntroVideoLoop() {
   const { data: videos } = useQuery(introVideosQuery);
-  
-  const list = useMemo(
-    () =>
-      videos?.length
-        ? videos
-        : (media ?? [])
-            .filter((item) => item.kind === "video" && item.url)
-            .map((item) => ({
-              id: item.id,
-              label: item.title ?? "Vidéo",
-              video_url: item.url,
-              position: item.position,
-              is_active: item.is_active,
-              placement: "hero_intro" as const,
-              title: item.title,
-              description: item.description,
-              cta_label: null,
-              cta_url: null,
-            })),
-    [videos, media],
-  );
   const list = useMemo(() => videos ?? [], [videos]);
-  }
+  const [active, setActive] = useState(0);
+  const [front, setFront] = useState(0);
+  const frontRef = useRef<HTMLVideoElement>(null);
+  const backRef = useRef<HTMLVideoElement>(null);
 
-  const next = list.length > 1 ? (active + 1) % list.length : active;
+  useEffect(() => {
+    if (!list.length) return;
+    const current = frontRef.current;
+    const firstUrl = list[0]?.video_url;
+    if (!current || !firstUrl) return;
+    current.src = firstUrl;
+    current.load();
+    void current.play().catch(() => undefined);
+  }, [list]);
 
   useEffect(() => {
     if (list.length < 2) return;
     const hidden = front === 0 ? backRef.current : frontRef.current;
-    const nextUrl = list[next]?.video_url;
+    const nextIndex = (active + 1) % list.length;
+    const nextUrl = list[nextIndex]?.video_url;
     if (!hidden || !nextUrl) return;
-
-    setReady(false);
     hidden.src = nextUrl;
-    hidden.preload = "auto";
     hidden.load();
-
-    const markReady = () => setReady(true);
-    hidden.addEventListener("canplay", markReady, { once: true });
-    hidden.addEventListener("loadeddata", markReady, { once: true });
-    return () => {
-      hidden.removeEventListener("canplay", markReady);
-      hidden.removeEventListener("loadeddata", markReady);
-    };
-  }, [active, front, next, list]);
-
-  useEffect(() => {
-    if (list.length < 2 || !ready) return;
-    const current = front === 0 ? frontRef.current : backRef.current;
-    const hidden = front === 0 ? backRef.current : frontRef.current;
-    if (!current || !hidden || !Number.isFinite(current.duration) || current.duration <= 0) return;
-
-    const lead = 0.7;
-    const remaining = Math.max(0.25, current.duration - current.currentTime - lead);
-    const timer = window.setTimeout(() => {
-      void hidden.play().catch(() => undefined);
-      setFront(1 - front);
-      setActive(next);
-    }, remaining * 1000);
-
-    return () => window.clearTimeout(timer);
-  }, [active, front, next, ready, list]);
+  }, [active, front, list]);
 
   if (!list.length) {
     return (
       <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-ink shadow-elevated">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.22),transparent_35%),linear-gradient(135deg,#111,#000)]" />
-        <div className="relative flex h-full items-center justify-center p-6 text-center">
+        <div className="flex h-full items-center justify-center p-6 text-center">
           <div>
             <p className="eyebrow text-gold">LT GROUP</p>
             <p className="mt-3 font-display text-xl text-white sm:text-2xl">Notre savoir-faire en mouvement</p>
-            <p className="mt-2 text-sm text-white/60">La vidéo de présentation sera affichée ici dès qu’elle est ajoutée depuis l’administration.</p>
           </div>
         </div>
       </div>
     );
   }
+
+  const handleEnded = () => {
+    if (list.length < 2) {
+      const current = front === 0 ? frontRef.current : backRef.current;
+      if (current) { current.currentTime = 0; void current.play().catch(() => undefined); }
+      return;
+    }
+    const hidden = front === 0 ? backRef.current : frontRef.current;
+    if (!hidden) return;
+    void hidden.play().catch(() => undefined);
+    setFront((slot) => 1 - slot);
+    setActive((index) => (index + 1) % list.length);
+  };
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
@@ -141,10 +115,11 @@ function IntroVideoLoop() {
         <video
           key={slot}
           ref={slot === 0 ? frontRef : backRef}
-          className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out " + (slot === front ? "opacity-100" : "opacity-0")}
+          className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-500 " + (slot === front ? "opacity-100" : "opacity-0")}
           muted
           playsInline
           preload={slot === front ? "auto" : "metadata"}
+          onEnded={slot === front ? handleEnded : undefined}
           aria-hidden={slot !== front}
         />
       ))}
