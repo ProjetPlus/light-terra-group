@@ -18,7 +18,7 @@ function env(name: string) {
 }
 
 function supabaseAdmin() {
-  const url = env("SUPABASE_URL") || env("VITE_SUPABASE_URL");
+  const url = env("SUPABASE_URL") || env("VITE_SUPABASE_URL") || "https://ghkijyimotuivykvwlge.supabase.co";
   const key = env("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) throw new Error("Configuration serveur Supabase manquante.");
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -70,7 +70,10 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
 
     if (error || !subscriber) throw new Error(error?.message ?? "Inscription impossible.");
 
-    let welcomeSent = false;
+    let welcomeSent = Boolean(existing?.welcome_sent_at);
+    if (welcomeSent) {
+      return { ok: true as const, alreadySubscribed: true, welcomeSent: true, message: "Cette adresse est déjà abonnée à la newsletter." };
+    }
     try {
       const name = escapeHtml(data.fullName);
       await sendResend(
@@ -104,13 +107,31 @@ export const notifyNewsSubscribers = createServerFn({ method: "POST" })
     let sent = 0;
 
     for (const subscriber of subscribers ?? []) {
-      const { data: delivery, error: deliveryError } = await db.from("newsletter_deliveries").upsert({
-        subscriber_id: subscriber.id,
-        news_id: news.id,
-        status: "pending",
-      }, { onConflict: "subscriber_id,news_id", ignoreDuplicates: true }).select("id,status").maybeSingle();
+      const { data: existingDelivery, error: existingDeliveryError } = await db
+        .from("newsletter_deliveries")
+        .select("id,status")
+        .eq("subscriber_id", subscriber.id)
+        .eq("news_id", news.id)
+        .maybeSingle();
 
-      if (deliveryError || !delivery || delivery.status === "sent") continue;
+      if (existingDeliveryError) continue;
+      if (existingDelivery?.status === "sent") continue;
+
+      const deliveryId = existingDelivery?.id ?? null;
+      if (deliveryId) {
+        const { error: resetError } = await db
+          .from("newsletter_deliveries")
+          .update({ status: "pending", error_message: null, sent_at: null })
+          .eq("id", deliveryId);
+        if (resetError) continue;
+      } else {
+        const { data: createdDelivery, error: createDeliveryError } = await db
+          .from("newsletter_deliveries")
+          .insert({ subscriber_id: subscriber.id, news_id: news.id, status: "pending" })
+          .select("id")
+          .single();
+        if (createDeliveryError || !createdDelivery) continue;
+      }
 
       try {
         const siteUrl = env("SITE_URL") || "https://ltgroup-ci.com";
@@ -123,7 +144,7 @@ export const notifyNewsSubscribers = createServerFn({ method: "POST" })
           `LT GROUP — ${news.title}`,
           `<div style="margin:0;background:#f5f7f5;padding:32px;font-family:Arial,sans-serif;color:#17211d"><div style="max-width:680px;margin:auto;background:#fff;border-radius:18px;overflow:hidden;border:1px solid #e4e9e6"><div style="padding:24px 30px;background:#0b1f18;text-align:center"><img src="${logoUrl()}" alt="LT GROUP" style="max-width:210px;max-height:70px;object-fit:contain"></div>${news.cover_image_url || news.image_url ? `<img src="${escapeHtml(news.cover_image_url || news.image_url || "")}" alt="" style="display:block;width:100%;height:280px;object-fit:cover">` : ""}<div style="padding:34px"><p style="color:#a47a28;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:700">Actualité LT GROUP</p><h1 style="font-size:27px;line-height:1.25;margin:10px 0 16px">${title}</h1><p style="font-size:16px;line-height:1.7;color:#59635e">Bonjour ${name},</p><p style="font-size:16px;line-height:1.7;color:#59635e">${excerpt}</p><a href="${link}" style="display:inline-block;margin-top:18px;background:#b58a3a;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:700">Lire l'actualité</a></div></div></div>`,
         );
-        await db.from("newsletter_deliveries").update({ status: "sent", sent_at: new Date().toISOString(), error_message: null }).eq("id", delivery.id);
+        await db.from("newsletter_deliveries").update({ status: "sent", sent_at: new Date().toISOString(), error_message: null }).eq("subscriber_id", subscriber.id).eq("news_id", news.id);
         sent++;
       } catch (error) {
         await db.from("newsletter_deliveries").update({ status: "failed", error_message: error instanceof Error ? error.message.slice(0, 500) : "Erreur d'envoi" }).eq("id", delivery.id);
