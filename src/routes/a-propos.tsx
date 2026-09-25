@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, Gem, Target } from "lucide-react";
+import { Eye, Gem, Target, ShieldCheck, Workflow, MapPinned } from "lucide-react";
 
 import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
 import { activitiesQuery, companyQuery } from "@/lib/site-data";
@@ -85,6 +85,29 @@ function Page() {
         </div>
       </section>
 
+
+
+      <section className="bg-ink-gradient py-20 text-ink-foreground">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 lg:grid-cols-3 lg:px-8">
+          <div className="lg:col-span-2">
+            <p className="eyebrow text-gold">Notre manière de travailler</p>
+            <h2 className="mt-3 max-w-3xl text-3xl lg:text-4xl">Une approche structurée, du terrain à la réalisation</h2>
+            <p className="mt-6 max-w-3xl leading-8 text-ink-foreground/70">
+              LT GROUP intervient dans un environnement où la qualité d’un projet dépend autant de la pertinence de l’opportunité que de la rigueur de sa préparation. Nous mettons donc l’accent sur l’identification du besoin, la lecture du terrain, la structuration des informations, la coordination des intervenants et le suivi des étapes clés.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            {[
+              [ShieldCheck, "Clarté documentaire", "Présenter les informations disponibles de façon organisée et compréhensible."],
+              [Workflow, "Coordination", "Faire dialoguer foncier, études, travaux et partenaires autour d’un même objectif."],
+              [MapPinned, "Ancrage local", "Concevoir des réponses adaptées aux réalités des territoires ivoiriens."]
+            ].map(([Icon, title, text]) => {
+              const I = Icon as typeof ShieldCheck;
+              return <div key={String(title)} className="rounded-xl border border-white/10 bg-white/5 p-5"><I className="h-6 w-6 text-gold" /><h3 className="mt-3 font-semibold">{String(title)}</h3><p className="mt-2 text-sm leading-relaxed text-ink-foreground/60">{String(text)}</p></div>;
+            })}
+          </div>
+        </div>
+      </section>
       {activities && activities.length > 0 ? (
         <section className="bg-muted/50 py-20">
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
