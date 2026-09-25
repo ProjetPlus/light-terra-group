@@ -122,7 +122,7 @@ function Page() {
                   <div className="p-5">
                     <h3 className="text-base">{activity.title}</h3>
                     <p className="mt-2 text-sm text-muted-foreground">{activity.short_description}</p>
-                    <Link to={"/activites/$slug" as any} params={{ slug: activity.slug } as any} className="mt-4 inline-flex text-sm font-semibold underline underline-offset-4">Découvrir →</Link>
+                    <Link to={"/activites/$slug" as never} params={{ slug: activity.slug } as never} className="mt-4 inline-flex text-sm font-semibold underline underline-offset-4">Découvrir →</Link>
                   </div>
                 </li>
               ))}
