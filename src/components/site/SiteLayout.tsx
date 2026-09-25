@@ -34,9 +34,9 @@ export function SiteHeader() {
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3 lg:px-8">
         <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="LIGHT TERRA GROUP — accueil">
           <img
-            src={company?.logo_url || LOGO_URL}
+            src={company?.logo_png_url || company?.logo_url || LOGO_URL}
             alt="Logo LIGHT TERRA GROUP"
-            className="h-12 w-auto shrink-0 lg:h-16"
+            className="h-10 w-auto max-w-[190px] shrink-0 object-contain lg:h-12 lg:max-w-[230px]"
             width={600}
             height={400}
           />
@@ -139,10 +139,10 @@ export function SiteFooter() {
         <div className="lg:col-span-2">
           <div className="inline-block rounded-lg bg-secondary p-4 shadow-sm">
             <img
-              src={LOGO_URL}
+              src={company?.logo_jpg_url || company?.logo_url || LOGO_URL}
               alt="Logo LIGHT TERRA GROUP"
               loading="lazy"
-              className="h-20 w-auto"
+              className="h-14 w-auto max-w-[210px] object-contain sm:h-16"
               width={600}
               height={400}
             />
