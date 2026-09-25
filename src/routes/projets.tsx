@@ -67,8 +67,9 @@ function Page() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {list.map((project) => (
-            <a
-              href={"/projets/" + project.slug}
+            <Link
+              to="/projets/$slug"
+              params={{ slug: project.slug }}
               key={project.id}
               className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated"
             >
@@ -90,7 +91,7 @@ function Page() {
                   {project.summary ?? project.content}
                 </p>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </section>
