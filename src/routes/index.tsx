@@ -256,10 +256,10 @@ function VideoShowcase() {
                     aria-hidden={i !== safeIndex}
                   />
                 ))
-              : projectList.map((project, i) => (
+              : projectList.filter((project) => project.image_url || project.cover_image_url).map((project, i) => (
                   <img
                     key={project.id}
-                    src={project.image_url ?? "/media/hero1.jpg"}
+                    src={project.image_url || project.cover_image_url || ""}
                     alt={project.title}
                     className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === safeIndex ? "opacity-100" : "opacity-0")}
                     aria-hidden={i !== safeIndex}
