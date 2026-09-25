@@ -6,8 +6,8 @@ import { Link } from "@tanstack/react-router";
 import { formatDateFr, newsListQuery } from "@/lib/site-data";
 import { MediaPreview } from "@/components/site/MediaPreview";
 
-const title = "Actualités — LIGHT TERRA GROUP";
-const description = "Les dernières actualités, chantiers et annonces de LIGHT TERRA GROUP.";
+const title = "Actualités — LT GROUP";
+const description = "Les dernières actualités, chantiers et annonces de LT GROUP.";
 
 export const Route = createFileRoute("/actualites")({
   head: () => ({
