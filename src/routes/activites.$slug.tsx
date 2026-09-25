@@ -63,7 +63,7 @@ function Page() {
           <p className="eyebrow">Réalisations liées</p>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
             {relatedProjects.map((project) => (
-              <Link key={project.id} to="/projets/$slug" params={{ slug: project.slug }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+              <Link key={project.id} to={"/projets/$slug" as any} params={{ slug: project.slug }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
                 {project.cover_image_url || project.image_url ? <MediaPreview url={project.cover_image_url || project.image_url || ""} alt={project.title} className="h-44 w-full object-cover" /> : null}
                 <div className="p-5"><h3 className="text-lg">{project.title}</h3><p className="mt-2 text-sm text-muted-foreground">{project.summary}</p></div>
               </Link>
@@ -77,7 +77,7 @@ function Page() {
           <p className="eyebrow">Explorer nos autres pôles</p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {otherActivities.map((item) => (
-              <Link key={item.id} to="/activites/$slug" params={{ slug: item.slug }} className="rounded-xl border border-border bg-card p-5 transition hover:-translate-y-1 hover:shadow-elevated">
+              <Link key={item.id} to={"/activites/$slug" as any} params={{ slug: item.slug }} className="rounded-xl border border-border bg-card p-5 transition hover:-translate-y-1 hover:shadow-elevated">
                 <h3 className="text-lg">{item.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{item.short_description}</p>
               </Link>
