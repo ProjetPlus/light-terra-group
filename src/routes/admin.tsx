@@ -193,7 +193,7 @@ const TABLES: TableDef[] = [
     ],
   },
   {
-    key: "media", label: "Photos & vidéos", table: "media_items",
+    key: "media", label: "Médiathèque — photos & vidéos", table: "media_items",
     order: { column: "position", ascending: true },
     columns: ["title", "kind", "is_active"], create: true,
     fields: [
@@ -350,7 +350,7 @@ function AdminPage() {
         <div className="flex h-full flex-col shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
             <div className="flex min-h-16 items-center rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-white/10">
-              <img src={company?.logo_jpg_url || company?.logo_png_url || company?.logo_url || LOGO_URL} alt="LT GROUP" className="h-12 w-auto max-w-[230px] object-contain" />
+              <img src={company?.logo_jpg_url || LOGO_URL} alt="LT GROUP" className="h-12 w-auto max-w-[230px] object-contain" />
             </div>
             <button type="button" className="rounded-md p-2 hover:bg-white/10 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
               <X className="h-5 w-5" />
@@ -471,7 +471,7 @@ function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
       <div>
         <p className="eyebrow">Vue d'ensemble</p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">Bienvenue dans votre espace d'administration</h2>
-        <p className="mt-2 max-w-2xl text-sm text-slate-500">Publiez, organisez et modérez le contenu du site depuis un seul espace. Les fichiers sont téléversés directement, sans copier de liens.</p>
+        <p className="mt-2 max-w-2xl text-sm text-slate-500">Publiez, organisez et modérez le contenu du site depuis un seul espace. Les visuels de l’accueil, des pôles, projets, actualités, partenaires et de la médiathèque restent remplaçables depuis l’administration.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {queries.map(([label, key]) => <DashboardCard key={key} label={label} table={key} onClick={() => onSelect(key)} />)}
