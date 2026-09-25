@@ -97,7 +97,7 @@ function Page() {
           <h2 className="text-2xl">Nos prestations</h2>
           <hr className="gold-rule mt-4 w-16" />
           <ul className="mt-6 space-y-3 text-sm leading-relaxed text-muted-foreground">
-            {PROJECT_TYPES.slice(0, 6).map((p) => (
+            {PROJECT_TYPES.map((p) => (
               <li key={p} className="border-b border-border pb-3">
                 {p}
               </li>
