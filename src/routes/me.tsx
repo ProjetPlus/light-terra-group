@@ -10,11 +10,11 @@ export const Route = createFileRoute("/me")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Espace réservé — LIGHT TERRA GROUP" },
-      { name: "description", content: "Accès réservé à l'équipe LIGHT TERRA GROUP." },
+      { title: "Espace réservé — LT GROUP" },
+      { name: "description", content: "Accès réservé à l'équipe LT GROUP." },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Espace réservé — LIGHT TERRA GROUP" },
-      { property: "og:description", content: "Accès réservé à l'équipe LIGHT TERRA GROUP." },
+      { property: "og:title", content: "Espace réservé — LT GROUP" },
+      { property: "og:description", content: "Accès réservé à l'équipe LT GROUP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -55,7 +55,7 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-ink-gradient px-5 py-16">
       <div className="w-full max-w-md rounded-lg border border-gold/30 bg-card p-8 shadow-elevated">
-        <img src={LOGO_URL} alt="LIGHT TERRA GROUP" className="mx-auto h-16 w-auto" />
+        <img src={LOGO_URL} alt="LT GROUP" className="mx-auto h-16 w-auto" />
         <h1 className="mt-6 text-center text-2xl">Espace réservé</h1>
         <hr className="gold-rule mx-auto mt-4 w-16" />
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
