@@ -13,7 +13,7 @@ export const Route = createFileRoute("/actualites/$slug")({
       { name: "description", content: loaderData?.excerpt ?? "Actualité LT GROUP." },
       { property: "og:title", content: loaderData?.title ?? "Actualité — LT GROUP" },
       { property: "og:description", content: loaderData?.excerpt ?? "Actualité LT GROUP." },
-      { property: "og:image", content: loaderData?.video_poster_url ?? loaderData?.image_url ?? "/media/og-light-terra.png" },
+      { property: "og:image", content: loaderData?.cover_image_url ?? loaderData?.video_poster_url ?? loaderData?.image_url ?? "/media/og-light-terra.png" },
     ],
   }),
   component: Page,
@@ -50,6 +50,8 @@ function Page() {
           {item.author ? <span>— {item.author}</span> : null}
         </div>
 
+        {item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} className="mb-6 max-h-[520px] w-full rounded-2xl object-cover shadow-elevated" /> : null}
+
         {item.image_url || item.video_url ? (
           <MediaPreview
             url={item.image_url ?? item.video_url}
@@ -75,7 +77,7 @@ function Page() {
             <div className="mt-6 grid gap-6 md:grid-cols-2">
               {related.map((news) => (
                 <Link key={news.id} to="/actualites/$slug" params={{ slug: news.slug }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
-                  {news.image_url || news.video_url ? <MediaPreview url={news.image_url ?? news.video_url} alt={news.title} poster={news.video_poster_url} className="h-48 w-full object-cover" /> : null}
+                  {news.cover_image_url || news.image_url || news.video_url ? <MediaPreview url={news.cover_image_url || news.image_url || news.video_url || ""} alt={news.title} poster={news.video_poster_url} className="h-48 w-full object-cover" /> : null}
                   <div className="p-5">
                     <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(news.published_at ?? news.created_at)}</p>
                     <h2 className="mt-2 text-xl">{news.title}</h2>
