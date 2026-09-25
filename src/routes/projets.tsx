@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 
 import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
+import { MediaPreview } from "@/components/site/MediaPreview";
 import { projectsQuery } from "@/lib/site-data";
 
 const title = "Projets & réalisations — LIGHT TERRA GROUP";
@@ -66,18 +67,13 @@ function Page() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {list.map((project) => (
-            <article
+            <Link
+              to="/projets/$slug"
+              params={{ slug: project.slug }}
               key={project.id}
               className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated"
             >
-              {project.image_url ? (
-                <img
-                  src={project.image_url}
-                  alt={project.title}
-                  loading="lazy"
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              ) : null}
+              {project.image_url ? <MediaPreview url={project.image_url} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
               <div className="p-6">
                 <div className="flex items-center justify-between gap-3">
                   <p className="eyebrow">{project.category ?? "Projet"}</p>
@@ -95,7 +91,7 @@ function Page() {
                   {project.summary ?? project.content}
                 </p>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
