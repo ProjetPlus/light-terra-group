@@ -197,23 +197,23 @@ export const askAssistant = createServerFn({ method: "POST" })
 
     if (supabaseUrl && supabaseKey) {
       try {
-      const client = createClient(supabaseUrl, publicKey ?? serviceRoleKey ?? "", {
+        const client = createClient(supabaseUrl, publicKey ?? serviceRoleKey ?? "", {
         auth: { persistSession: false, autoRefreshToken: false },
       });
-      const [kb, info, activities, projects, news] = await Promise.all([
+        const [kb, info, activities, projects, news] = await Promise.all([
         client.from("ai_knowledge").select("question,answer,is_active,position").eq("is_active", true).order("position"),
         client.from("company_info").select("*").limit(1).maybeSingle(),
         client.from("activities").select("title,short_description").eq("is_active", true).order("position"),
         client.from("projects").select("title,summary,location").eq("is_published", true).order("position").limit(8),
         client.from("news").select("title,excerpt,published_at").eq("is_published", true).order("published_at", { ascending: false }).limit(8),
       ]);
-      ctx = {
-        company: info.data as Record<string, unknown> | null,
-        activities: (activities.data ?? []) as SiteContext["activities"],
-        knowledge: (kb.data ?? []) as KnowledgeRow[],
-        projects: (projects.data ?? []) as SiteContext["projects"],
-        news: (news.data ?? []) as SiteContext["news"],
-      };
+        ctx = {
+          company: info.data as Record<string, unknown> | null,
+          activities: (activities.data ?? []) as SiteContext["activities"],
+          knowledge: (kb.data ?? []) as KnowledgeRow[],
+          projects: (projects.data ?? []) as SiteContext["projects"],
+          news: (news.data ?? []) as SiteContext["news"],
+        };
       } catch (error) {
         console.error("Assistant context error");
         ctx = empty;
