@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Building2, Compass, Hammer, Zap } from "lucide-react";
 
 import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
+import { MediaPreview } from "@/components/site/MediaPreview";
 import { Button } from "@/components/ui/button";
 import { activitiesQuery } from "@/lib/site-data";
 
@@ -43,7 +44,9 @@ function Page() {
           {(activities ?? []).map((activity, i) => {
             const Icon = ICONS[activity.icon ?? ""] ?? Building2;
             return (
-              <article
+              <Link
+                to="/activites/$slug"
+                params={{ slug: activity.slug }}
                 key={activity.id}
                 className="grid gap-6 rounded-lg border border-border bg-card p-6 lg:grid-cols-[auto_1fr] lg:p-8"
               >
@@ -56,6 +59,7 @@ function Page() {
                   <p className="mt-3 leading-relaxed text-muted-foreground">
                     {activity.description ?? activity.short_description}
                   </p>
+                  {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 h-40 w-full rounded-md object-cover" /> : null}
                 </div>
               </article>
             );
