@@ -34,7 +34,7 @@ export function MediaPreview({
         muted={autoPlay}
         loop={loop}
         playsInline
-        preload={autoPlay ? "metadata" : "none"}
+        preload="metadata"
         className={className}
         aria-label={alt}
       />
