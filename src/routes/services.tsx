@@ -9,7 +9,7 @@ import { submitRequest } from "@/lib/requests.functions";
 
 const title = "Services & devis — LT GROUP";
 const description =
-  "Demandez un devis personnalisé : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification.";
+  "Demandez un accompagnement personnalisé : vente de terrains, commercialisation foncière, aménagement, BTP & VRD, immobilier, hydraulique, électrification et études.";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -26,6 +26,7 @@ export const Route = createFileRoute("/services")({
 });
 
 const PROJECT_TYPES = [
+  "Vente & commercialisation de terrains",
   "Aménagement foncier / lotissement",
   "BTP & VRD",
   "Construction immobilière",
@@ -102,9 +103,11 @@ function Page() {
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-sm text-muted-foreground">
-            Chaque demande est étudiée par nos équipes techniques. Vous recevez une proposition
-            adaptée à votre projet, votre budget et vos délais.
+          <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+            <strong className="text-foreground">Vente de terrains :</strong> nous proposons des terrains sélectionnés à la vente et accompagnons les acquéreurs dans leur démarche. Les propriétaires peuvent également nous confier la commercialisation de leurs terrains, selon les modalités convenues avec eux.
+          </p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Chaque demande est étudiée par nos équipes. Vous recevez un accompagnement adapté à votre projet, votre budget et vos délais.
           </p>
         </div>
 
