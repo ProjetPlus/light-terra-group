@@ -315,7 +315,7 @@ function Activities() {
         {activities.map((activity) => {
           const Icon = ACTIVITY_ICONS[activity.icon ?? ""] ?? Building2;
           return (
-            <Link key={activity.id} to="/activites/$slug" params={{ slug: activity.slug }} className="group rounded-lg border border-border bg-card p-7 transition hover:-translate-y-1 hover:shadow-elevated">
+            <Link key={activity.id} to={"/activites/$slug" as any} params={{ slug: activity.slug }} className="group rounded-lg border border-border bg-card p-7 transition hover:-translate-y-1 hover:shadow-elevated">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-sm bg-accent text-gold-deep"><Icon className="h-6 w-6" /></span>
               <h3 className="mt-5 text-xl">{activity.title}</h3>
               {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 aspect-[16/9] w-full rounded-md object-cover" /> : null}
