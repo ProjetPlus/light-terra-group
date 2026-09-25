@@ -24,7 +24,6 @@ import {
   formatDateFr,
   heroSlidesQuery,
   introVideosQuery,
-  mediaItemsQuery,
   showcaseVideosQuery,
   newsListQuery,
   projectsQuery,
@@ -79,48 +78,7 @@ function IntroVideoLoop() {
             })),
     [videos, media],
   );
-  const [active, setActive] = useState(0);
-  const [front, setFront] = useState(0);
-  const [ready, setReady] = useState(false);
-  const frontRef = useRef<HTMLVideoElement>(null);
-  const backRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (!list.length) return;
-    const first = frontRef.current;
-    if (!first) return;
-    const firstUrl = list.at(0)?.video_url;
-    if (!firstUrl) return;
-    first.src = firstUrl;
-    first.preload = "auto";
-    first.load();
-    const play = () => void first.play().catch(() => undefined);
-    first.addEventListener("canplay", play, { once: true });
-    return () => first.removeEventListener("canplay", play);
-  }, [list]);
-
-  const hasNonVideoMedia = list.some((item) => !isVideoMedia(item.video_url));
-  useEffect(() => {
-    if (!hasNonVideoMedia || list.length < 2) return;
-    const timer = window.setInterval(() => setActive((i) => (i + 1) % list.length), 6500);
-    return () => window.clearInterval(timer);
-  }, [hasNonVideoMedia, list.length]);
-
-  if (hasNonVideoMedia) {
-    return (
-      <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
-        {list.map((item, i) => (
-          <MediaPreview
-            key={item.id}
-            url={item.video_url}
-            alt={item.title ?? item.label}
-            className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === active ? "opacity-100" : "opacity-0")}
-            autoPlay={isVideoMedia(item.video_url) && i === active}
-            loop
-          />
-        ))}
-      </div>
-    );
+  const list = useMemo(() => videos ?? [], [videos]);
   }
 
   const next = list.length > 1 ? (active + 1) % list.length : active;
