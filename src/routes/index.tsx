@@ -212,7 +212,7 @@ function VideoShowcase() {
   const { data: projects } = useQuery(projectsQuery);
   const [index, setIndex] = useState(0);
   const videoList = videos ?? [];
-  const projectList = (projects ?? []).slice(0, 4);
+  const projectList = (projects ?? []).filter((project) => project.image_url || project.cover_image_url).slice(0, 4);
 
   useEffect(() => {
     const length = videoList.length || projectList.length;
@@ -256,7 +256,7 @@ function VideoShowcase() {
                     aria-hidden={i !== safeIndex}
                   />
                 ))
-              : projectList.filter((project) => project.image_url || project.cover_image_url).map((project, i) => (
+              : projectList.map((project, i) => (
                   <img
                     key={project.id}
                     src={project.image_url || project.cover_image_url || ""}
