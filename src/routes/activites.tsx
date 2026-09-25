@@ -45,8 +45,8 @@ function Page() {
             const Icon = ICONS[activity.icon ?? ""] ?? Building2;
             return (
               <Link
-                to={"/activites/$slug" as never}
-                params={{ slug: activity.slug } as never}
+                to="/activites/$slug"
+                params={{ slug: activity.slug }}
                 key={activity.id}
                 className="grid gap-6 rounded-lg border border-border bg-card p-6 lg:grid-cols-[auto_1fr] lg:p-8"
               >
