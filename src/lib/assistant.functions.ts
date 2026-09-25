@@ -182,7 +182,9 @@ function localReply(question: string, ctx: SiteContext) {
 export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
-    // Public LT GROUP Supabase configuration is pinned to production so Raï can\n    // still load the company database when Vercel environment injection is stale or absent.\n    const supabaseUrl = "https://ghkijyimotuivkvwlge.supabase.co";\n    const publicKey =\n      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??\n      process.env["SUPABASE_PUBLISHABLE_KEY"] ??\n      "sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj";\n    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    // Public LT GROUP Supabase configuration is pinned to production so Raï can
+    // still load the company database when Vercel environment injection is stale or absent.
+    const supabaseUrl = "https://ghkijyimotuivykvwlge.supabase.co";\n    const publicKey =\n      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??\n      process.env["SUPABASE_PUBLISHABLE_KEY"] ??\n      "sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj";\n    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
     const supabaseKey = publicKey;
 
     const empty: SiteContext = { company: null, activities: [], knowledge: [], projects: [], news: [] };
