@@ -17,7 +17,7 @@ export function AiAssistant() {
     {
       role: "assistant",
       content:
-        "Bonjour, je suis Raï, l'assistante virtuelle de LIGHT TERRA GROUP. Posez-moi vos questions sur nos activités, nos projets ou une demande de devis.",
+        "Bonjour, je suis Raï, l'assistante virtuelle de LT GROUP. Posez-moi vos questions sur nos activités, nos projets ou une demande de devis.",
     },
   ]);
   const listRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ export function AiAssistant() {
         ) : (
           <img
             src={ASSISTANT_AVATAR_URL}
-            alt="Raï, assistante virtuelle LIGHT TERRA GROUP"
+            alt="Raï, assistante virtuelle LT GROUP"
             className="h-full w-full object-cover object-center"
             width={256}
             height={256}
@@ -82,7 +82,7 @@ export function AiAssistant() {
               className="h-10 w-10 shrink-0 rounded-full border border-gold/60 object-cover"
             />
             <div className="min-w-0">
-              <p className="truncate font-display text-base text-gold">Raï — LIGHT TERRA GROUP</p>
+              <p className="truncate font-display text-base text-gold">Raï — LT GROUP</p>
               <p className="text-xs text-ink-foreground/60">Réponses instantanées</p>
             </div>
           </div>
