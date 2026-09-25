@@ -4,18 +4,13 @@ import type { Database } from './types';
 import { brokeredPreviewStorage } from './previewAuthStorage';
 
 function createSupabaseClient() {
-  // Client-side builds use Vite env values. SSR may use process.env.
-  // The publishable key is safe for browser use; the fallback keeps the
-  // public site connected even when Vercel has not injected VITE_* variables.
-  const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
-  const SUPABASE_URL =
-    import.meta.env['VITE_SUPABASE_URL'] ||
-    serverEnv?.['SUPABASE_URL'] ||
-    'https://ghkijyimotuivkvwlge.supabase.co';
+  // LT GROUP production Supabase configuration.
+  // Public client configuration is intentionally pinned to the production
+  // project so a stale/misconfigured Vercel environment variable cannot
+  // disconnect the public site from the correct database.
+  const SUPABASE_URL = 'https://ghkijyimotuivykvwlge.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ||
-    serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] ||
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdoa2lqeWltb3R1aXZ5a3Z3bGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNzAyMDYsImV4cCI6MjEwNTg0NjIwNn0.jR9CJTPUNM0GHnWb4i2GXaT5DHoWT6oXAmQL5UJ0q9Q';
+    'sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj';
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
