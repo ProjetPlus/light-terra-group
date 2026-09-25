@@ -188,7 +188,7 @@ export const askAssistant = createServerFn({ method: "POST" })
       process.env["SUPABASE_PUBLISHABLE_KEY"] ??
       "sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj";
     const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
-    const supabaseKey = publicKey;
+    const supabaseKey = serviceRoleKey ?? publicKey;
 
     const empty: SiteContext = {
       company: null,
