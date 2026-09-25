@@ -255,3 +255,12 @@
 @utility animate-rise-in {
   animation: rise-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+
+@media (max-width: 640px) {
+  h1.text-6xl, h1.text-5xl { font-size: clamp(2rem, 9vw, 2.65rem); line-height: 1.08; }
+  h2.text-5xl, h2.text-4xl { font-size: clamp(1.65rem, 7vw, 2.2rem); line-height: 1.12; }
+  h3.text-3xl, h3.text-2xl { font-size: clamp(1.25rem, 5.5vw, 1.6rem); line-height: 1.2; }
+  section { max-width: 100%; }
+  input, textarea, select, button { max-width: 100%; }
+}
