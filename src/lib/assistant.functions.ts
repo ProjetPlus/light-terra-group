@@ -183,16 +183,15 @@ export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
     const supabaseUrl = process.env["VITE_SUPABASE_URL"] ?? process.env["SUPABASE_URL"];
-    const supabaseKey =
-      process.env["SUPABASE_SERVICE_ROLE_KEY"] ??
-      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
-      process.env["SUPABASE_PUBLISHABLE_KEY"];
+    const publicKey = process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
+    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    const supabaseKey = publicKey;
 
     const empty: SiteContext = { company: null, activities: [], knowledge: [], projects: [], news: [] };
     let ctx = empty;
 
     if (supabaseUrl && supabaseKey) {
-      const client = createClient(supabaseUrl, supabaseKey, {
+      const client = createClient(supabaseUrl, publicKey ?? serviceRoleKey ?? "", {
         auth: { persistSession: false, autoRefreshToken: false },
       });
       const [kb, info, activities, projects, news] = await Promise.all([
@@ -237,7 +236,8 @@ ACTUALITÉS:
 ${ctx.news.map((n) => "- " + n.title + (n.excerpt ? ": " + n.excerpt : "")).join("\\n")}`;
 
     const openAiKey = process.env["OPENAI_API_KEY"];
-    const lovableKey = process.env["LOVABLE_API_KEY"];
+    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    const publicKey = process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
 
     try {
       if (openAiKey) {
@@ -254,36 +254,11 @@ ${ctx.news.map((n) => "- " + n.title + (n.excerpt ? ": " + n.excerpt : "")).join
           const payload = (await response.json()) as { output_text?: string };
           const reply = payload.output_text?.trim();
           if (reply) {
-            if (supabaseUrl && supabaseKey) { try { await persistConversation(supabaseUrl, supabaseKey, data, reply); } catch (error) { console.error("Assistant persistence error", error); } }
+            if (supabaseUrl && serviceRoleKey) { try { await persistConversation(supabaseUrl, serviceRoleKey, data, reply); } catch (error) { console.error("Assistant persistence error"); } }
             return { ok: true as const, reply };
           }
         } else {
           console.error("OpenAI assistant error", response.status, await response.text());
-        }
-      } else if (lovableKey) {
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}` },
-          body: JSON.stringify({
-            model: "openai/gpt-5.6-terra",
-            input: [{ role: "system", content: system }, ...data.messages],
-          }),
-        });
-        if (response.ok) {
-          const payload = (await response.json()) as {
-            output_text?: string;
-            output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
-          };
-          const reply =
-            payload.output_text ??
-            payload.output?.flatMap((item) => item.content ?? []).map((c) => c.text ?? "").join("");
-          if (reply?.trim()) {
-            const finalReply = reply.trim();
-            if (supabaseUrl && supabaseKey) { try { await persistConversation(supabaseUrl, supabaseKey, data, finalReply); } catch (error) { console.error("Assistant persistence error", error); } }
-            return { ok: true as const, reply: finalReply };
-          }
-        } else {
-          console.error("Lovable assistant error", response.status, await response.text());
         }
       }
     } catch (error) {
@@ -292,8 +267,8 @@ ${ctx.news.map((n) => "- " + n.title + (n.excerpt ? ": " + n.excerpt : "")).join
 
     // Fallback autonome : Raï reste fonctionnelle même sans fournisseur IA externe.
     const fallback = localReply(latestUserMessage, ctx);
-    if (supabaseUrl && supabaseKey) {
-      try { await persistConversation(supabaseUrl, supabaseKey, data, fallback); } catch (error) { console.error("Assistant persistence error", error); }
+    if (supabaseUrl && serviceRoleKey) {
+      try { await persistConversation(supabaseUrl, serviceRoleKey, data, fallback); } catch (error) { console.error("Assistant persistence error"); }
     }
     return { ok: true as const, reply: fallback };
   });
