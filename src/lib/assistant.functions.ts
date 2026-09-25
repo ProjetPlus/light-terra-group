@@ -39,7 +39,7 @@ function localReply(question: string, ctx: SiteContext) {
   if (best && best.score > 0) return best.item.answer;
 
   if (/activit|service|fait|metier|domaine|secteur/.test(nq) && ctx.activities.length) {
-    return "LIGHT TERRA GROUP intervient notamment dans " +
+    return "LT GROUP intervient notamment dans " +
       ctx.activities.slice(0, 5).map((a) => a.title).join(", ") +
       ". Vous pouvez consulter la page « Nos activités » pour le détail.";
   }
@@ -67,7 +67,7 @@ function localReply(question: string, ctx: SiteContext) {
     if (parts.length) return parts.join(" — ");
   }
 
-  return "Je peux vous renseigner sur les activités, projets, actualités et coordonnées de LIGHT TERRA GROUP. Pour une demande précise ou un devis, utilisez la page « Services & devis » ou « Contact ».";
+  return "Je peux vous renseigner sur les activités, projets, actualités et coordonnées de LT GROUP. Pour une demande précise ou un devis, utilisez la page « Services & devis » ou « Contact ».";
 }
 
 export const askAssistant = createServerFn({ method: "POST" })
@@ -102,7 +102,7 @@ export const askAssistant = createServerFn({ method: "POST" })
 
     const latestUserMessage = [...data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
-    const system = `Tu es Raï, l'assistante virtuelle officielle de LIGHT TERRA GROUP. Réponds en français, avec un ton professionnel et chaleureux, en 3 phrases maximum. Utilise uniquement le contexte fourni et n'invente jamais d'information. Si une information n'est pas disponible, oriente vers les pages Contact ou Services & devis.
+    const system = `Tu es Raï, l'assistante virtuelle officielle de LT GROUP. Réponds en français, avec un ton professionnel et chaleureux, en 3 phrases maximum. Utilise uniquement le contexte fourni et n'invente jamais d'information. Si une information n'est pas disponible, oriente vers les pages Contact ou Services & devis.
 
 CONTEXTE ENTREPRISE:
 ${JSON.stringify(ctx.company ?? {})}
