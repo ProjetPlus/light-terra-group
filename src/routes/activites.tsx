@@ -46,7 +46,7 @@ function Page() {
             return (
               <Link
                 to={"/activites/$slug" as any}
-                params={{ slug: activity.slug }}
+                params={{ slug: activity.slug } as any}
                 key={activity.id}
                 className="grid gap-6 rounded-lg border border-border bg-card p-6 lg:grid-cols-[auto_1fr] lg:p-8"
               >
