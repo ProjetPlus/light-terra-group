@@ -21,6 +21,8 @@ export type CompanyInfo = {
   linkedin_url: string | null;
   instagram_url: string | null;
   logo_url: string | null;
+  logo_png_url: string | null;
+  logo_jpg_url: string | null;
 };
 
 export type HeroSlide = {
