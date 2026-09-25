@@ -182,8 +182,6 @@ function localReply(question: string, ctx: SiteContext) {
 export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
-    // Public LT GROUP Supabase configuration is pinned to production so Raï can
-    // still load the company database when Vercel environment injection is stale or absent.
     const supabaseUrl = "https://ghkijyimotuivykvwlge.supabase.co";
     const publicKey =
       process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
@@ -192,32 +190,55 @@ export const askAssistant = createServerFn({ method: "POST" })
     const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
     const supabaseKey = publicKey;
 
-    const empty: SiteContext = { company: null, activities: [], knowledge: [], projects: [], news: [] };
+    const empty: SiteContext = {
+      company: null,
+      activities: [],
+      knowledge: [],
+      projects: [],
+      news: [],
+    };
     let ctx = empty;
 
-    if (supabaseUrl && supabaseKey) {
-      try {
-        const client = createClient(supabaseUrl, publicKey ?? serviceRoleKey ?? "", {
+    try {
+      const client = createClient(supabaseUrl, supabaseKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
-        const [kb, info, activities, projects, news] = await Promise.all([
-        client.from("ai_knowledge").select("question,answer,is_active,position").eq("is_active", true).order("position"),
+
+      const [kb, info, activities, projects, news] = await Promise.all([
+        client
+          .from("ai_knowledge")
+          .select("question,answer,is_active,position")
+          .eq("is_active", true)
+          .order("position"),
         client.from("company_info").select("*").limit(1).maybeSingle(),
-        client.from("activities").select("title,short_description").eq("is_active", true).order("position"),
-        client.from("projects").select("title,summary,location").eq("is_published", true).order("position").limit(8),
-        client.from("news").select("title,excerpt,published_at").eq("is_published", true).order("published_at", { ascending: false }).limit(8),
+        client
+          .from("activities")
+          .select("title,short_description")
+          .eq("is_active", true)
+          .order("position"),
+        client
+          .from("projects")
+          .select("title,summary,location")
+          .eq("is_published", true)
+          .order("position")
+          .limit(8),
+        client
+          .from("news")
+          .select("title,excerpt,published_at")
+          .eq("is_published", true)
+          .order("published_at", { ascending: false })
+          .limit(8),
       ]);
-        ctx = {
-          company: info.data as Record<string, unknown> | null,
-          activities: (activities.data ?? []) as SiteContext["activities"],
-          knowledge: (kb.data ?? []) as KnowledgeRow[],
-          projects: (projects.data ?? []) as SiteContext["projects"],
-          news: (news.data ?? []) as SiteContext["news"],
-        };
-      } catch (error) {
-        console.error("Assistant context error");
-        ctx = empty;
-      }
+
+      ctx = {
+        company: info.data as Record<string, unknown> | null,
+        activities: (activities.data ?? []) as SiteContext["activities"],
+        knowledge: (kb.data ?? []) as KnowledgeRow[],
+        projects: (projects.data ?? []) as SiteContext["projects"],
+        news: (news.data ?? []) as SiteContext["news"],
+      };
+    } catch (error) {
+      console.error("Assistant context error", error);
     }
 
     const latestUserMessage = [...data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
@@ -234,10 +255,10 @@ CONTEXTE ENTREPRISE:
 ${JSON.stringify(ctx.company ?? {})}
 
 ACTIVITÉS:
-${ctx.activities.map((a) => "- " + a.title + ": " + (a.short_description ?? "")).join("\\n")}
+${ctx.activities.map((a) => "- " + a.title + ": " + (a.short_description ?? "")).join("\n")}
 
 BASE DE CONNAISSANCES:
-${ctx.knowledge.map((k) => "Q: " + k.question + "\\nR: " + k.answer).join("\\n\\n")}
+${ctx.knowledge.map((k) => "Q: " + k.question + "\\nR: " + k.answer).join("\n\n")}
 
 PROJETS:
 ${ctx.projects.map((p) => "- " + p.title + (p.location ? " — " + p.location : "") + (p.summary ? ": " + p.summary : "")).join("\\n")}
