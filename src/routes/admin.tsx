@@ -54,7 +54,7 @@ const AI_ADMIN_DEFS: TableDef[] = [
   {
     key: "ai_visitors", label: "Assistant — visiteurs", table: "ai_visitors",
     order: { column: "last_seen_at", ascending: false },
-    columns: ["full_name", "email", "phone", "project_type", "request_type", "last_seen_at"], create: false,
+    columns: ["full_name", "email", "phone", "company", "city", "project_type", "request_type", "budget_range", "consent_contact", "status", "last_seen_at"], create: false,
     fields: [],
   },
   {
