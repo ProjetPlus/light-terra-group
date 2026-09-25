@@ -85,7 +85,7 @@ const TABLES: TableDef[] = [
   {
     key: "company_info", label: "Paramètres — identité & logo", table: "company_info",
     order: { column: "updated_at", ascending: false },
-    columns: ["name", "logo_url", "email", "phone_primary", "city"], create: true,
+    columns: ["name", "logo_png_url", "logo_jpg_url", "email", "phone_primary", "city"], create: false,
     fields: [
       { name: "name", label: "Nom", kind: "text", required: true },
       { name: "slogan", label: "Slogan", kind: "text", required: true },
@@ -594,7 +594,6 @@ function CrudPanel({ def }: { def: TableDef }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Row | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState("tous");
   const queryKey = useMemo(() => ["admin", def.table], [def.table]);
   const { data, isLoading, isError, error } = useQuery({
     queryKey,
@@ -606,7 +605,6 @@ function CrudPanel({ def }: { def: TableDef }) {
   });
   const { data: activities } = useQuery(activitiesQuery);
   const rows = data ?? [];
-  const visibleRows = def.table === "testimonials" && statusFilter !== "tous" ? rows.filter((r) => String(r["status"] ?? "") === statusFilter) : rows;
   const categoryOptions = (activities ?? []).map((a) => a.title);
 
   const save = useMutation({
@@ -621,12 +619,10 @@ function CrudPanel({ def }: { def: TableDef }) {
         const { data: firstRow } = await supabase.from(def.table).select("position").order("position", { ascending: true }).limit(1).maybeSingle();
         payload["position"] = firstRow?.position == null ? 0 : Number(firstRow["position"]) - 1;
       }
-      const result = id
-        ? await supabase.from(def.table).update(payload as never).eq("id", id)
-        : await supabase.from(def.table).insert(payload as never);
+      const result = id ? await supabase.from(def.table).update(payload as never).eq("id", id) : await supabase.from(def.table).insert(payload as never);
       if (result.error) throw new Error(result.error.message);
     },
-    onSuccess: () => { toast.success("Enregistré."); setEditing(null); void qc.invalidateQueries({ queryKey }); },
+    onSuccess: () => { toast.success("Enregistré."); setEditing(null); void qc.invalidateQueries({ queryKey }); void qc.invalidateQueries({ queryKey: companyQuery.queryKey }); },
     onError: (e: Error) => toast.error(e.message),
   });
   const remove = useMutation({
@@ -634,75 +630,70 @@ function CrudPanel({ def }: { def: TableDef }) {
     onSuccess: () => { toast.success("Supprimé."); void qc.invalidateQueries({ queryKey }); },
     onError: (e: Error) => toast.error(e.message),
   });
+
   if (isLoading) return <p className="text-sm text-muted-foreground">Chargement…</p>;
-  if (isError) return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-      <p className="font-medium text-red-800">Impossible de charger « {def.label} ».</p>
-      <p className="mt-2 text-sm text-red-700">{error instanceof Error ? error.message : "Erreur de connexion à Supabase."}</p>
-      <p className="mt-3 text-xs text-red-600">La page ne masque plus les erreurs par un zéro : vérifiez la connexion Supabase et rechargez.</p>
-    </div>
-  );
+  if (isError) return <div className="rounded-2xl border border-red-200 bg-red-50 p-5"><p className="font-medium text-red-800">Impossible de charger « {def.label} ».</p><p className="mt-2 text-sm text-red-700">{error instanceof Error ? error.message : "Erreur Supabase."}</p></div>;
+
+  const labelFor = (f: FieldDef, value: unknown) => {
+    if (f.kind === "boolean") return value ? "Oui" : "Non";
+    if (f.name === "placement") return value === "hero_intro" ? "Hero — introduction / identité" : value === "home_showcase" ? "Accueil — carousel projets" : String(value ?? "—");
+    return String(value ?? "—");
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-between gap-4">
-        <div><p className="eyebrow">{def.table === "testimonials" ? "Modération" : "Gestion de contenu"}</p><h2 className="mt-1 text-2xl">{def.label}</h2></div>
-        {def.create ? <Button variant="gold" size="sm" onClick={() => setEditing(newRowFor(def, rows))}>Ajouter</Button> : null}
+    <div className="min-w-0">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div><p className="eyebrow">{def.table === "testimonials" ? "Modération" : "Gestion de contenu"}</p><h2 className="mt-1 text-xl font-semibold sm:text-2xl">{def.label}</h2><p className="mt-1 text-sm text-muted-foreground">{rows.length} élément{rows.length > 1 ? "s" : ""}</p></div>
+        {def.create ? <Button variant="gold" size="sm" onClick={() => setEditing(newRowFor(def, rows))}>+ Ajouter</Button> : null}
       </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[680px] text-left text-sm">
+            <thead className="bg-slate-50"><tr>{def.columns.map((column) => <th key={column} className="whitespace-nowrap px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{column.replaceAll("_", " ")}</th>)}<th className="px-4 py-3" /></tr></thead>
+            <tbody>
+              {rows.map((row) => <tr key={String(row["id"])} className="border-t border-slate-100 hover:bg-slate-50/70">{def.columns.map((column) => <td key={column} className="max-w-[280px] truncate px-4 py-3">{typeof row[column] === "boolean" ? (row[column] ? "Oui" : "Non") : String(row[column] ?? "—")}</td>)}<td className="px-4 py-3"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:hidden">
+        {rows.map((row) => <div key={String(row["id"])} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="space-y-2">{def.columns.slice(0, 4).map((column) => <div key={column} className="flex min-w-0 justify-between gap-4 text-sm"><span className="shrink-0 text-xs uppercase tracking-wide text-muted-foreground">{column.replaceAll("_", " ")}</span><span className="min-w-0 truncate text-right font-medium">{typeof row[column] === "boolean" ? (row[column] ? "Oui" : "Non") : String(row[column] ?? "—")}</span></div>)}</div>
+          <div className="mt-4 flex gap-2"><Button size="sm" variant="outline" className="flex-1" onClick={() => setEditing(row)}>Modifier</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" className="flex-1" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div>
+        </div>)}
+        {!rows.length ? <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">Aucun élément.</div> : null}
+      </div>
+
       {editing ? (
-        <form className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(editing); }}>
-          {def.table === "testimonials" ? <div className="sm:col-span-2 rounded-md bg-muted p-4 text-sm"><p className="font-medium">{String(editing["author_name"] ?? "")}</p><p className="mt-1 text-muted-foreground">{String(editing["message"] ?? "")}</p><p className="mt-2 text-xs text-muted-foreground">{String(editing["company"] ?? "")}</p></div> : null}
-          {def.fields.map((f) => (
-            <label key={f.name} className={f.kind === "textarea" || f.kind === "file" ? "text-sm sm:col-span-2" : "text-sm"}>
-              <span className="font-medium">{f.label}</span>
-              {f.kind === "textarea" ? <textarea rows={4} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })} />
-              : f.kind === "boolean" ? <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={Boolean(editing[f.name])} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.checked })} /><span className="text-xs text-muted-foreground">{editing[f.name] ? "Activé" : "Désactivé"}</span></div>
-              : f.kind === "select" ? <select className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}><option value="">—</option>{(f.name === "category" ? categoryOptions : f.options ?? []).map((o) => {
-  const optionLabel =
-    f.name === "placement"
-      ? o === "hero_intro"
-        ? "Hero — introduction / identité"
-        : o === "home_showcase"
-          ? "Accueil — carousel projets"
-          : o
-      : o;
-  return <option key={o} value={o}>{optionLabel}</option>;
-})}</select>
-              : f.kind === "file" ? (
-                <div className="mt-2 rounded-md border border-dashed border-border p-4">
-                  <input type="file" accept={f.accept ?? (def.table === "media_items" && editing["kind"] === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-3 sm:p-6" role="dialog" aria-modal="true" aria-label={def.create && !editing["id"] ? "Ajouter" : "Modifier"}>
+          <div className="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b px-5 py-4 sm:px-6"><div><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{def.create && !editing["id"] ? "Nouvel élément" : "Modification"}</p><h3 className="text-lg font-semibold">{def.label}</h3></div><button type="button" onClick={() => setEditing(null)} className="rounded-lg p-2 hover:bg-slate-100" aria-label="Fermer"><X className="h-5 w-5" /></button></div>
+            <form className="grid min-h-0 gap-4 overflow-y-auto p-5 sm:grid-cols-2 sm:p-6" onSubmit={(e) => { e.preventDefault(); save.mutate(editing); }}>
+              {def.table === "testimonials" ? <div className="rounded-xl bg-slate-50 p-4 text-sm sm:col-span-2"><p className="font-medium">{String(editing["author_name"] ?? "")}</p><p className="mt-1 text-muted-foreground">{String(editing["message"] ?? "")}</p></div> : null}
+              {def.fields.map((f) => (
+                <label key={f.name} className={f.kind === "textarea" || f.kind === "file" ? "text-sm sm:col-span-2" : "text-sm"}>
+                  <span className="font-medium">{f.label}{f.required ? " *" : ""}</span>
+                  {f.kind === "textarea" ? <textarea rows={f.name === "content" || f.name === "description" ? 7 : 4} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })} />
+                  : f.kind === "boolean" ? <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={Boolean(editing[f.name])} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.checked })} /><span className="text-xs text-muted-foreground">{editing[f.name] ? "Activé" : "Désactivé"}</span></div>
+                  : f.kind === "select" ? <select className={field} value={String(editing[f.name] ?? "")} onChange={(e) => setEditing({ ...editing, [f.name]: e.target.value })}><option value="">—</option>{(f.name === "category" ? categoryOptions : f.options ?? []).map((o) => <option key={o} value={o}>{f.name === "placement" ? (o === "hero_intro" ? "Hero — introduction / identité" : "Accueil — carousel projets") : o}</option>)}</select>
+                  : f.kind === "file" ? <div className="mt-2 rounded-xl border border-dashed border-slate-300 p-4"><input type="file" accept={f.accept ?? "image/*,video/*"} className="block w-full max-w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
                     try {
-                    const url = def.table === "company_info" && f.name === "logo_png_url"
-                      ? await uploadBrandVariant(file, "png")
-                      : def.table === "company_info" && f.name === "logo_jpg_url"
-                        ? await uploadBrandVariant(file, "jpg")
-                        : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
-                    setEditing((current) => current ? {
-                      ...current,
-                      [f.name]: url,
-                      ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}),
-                      ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}),
-                      ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {}),
-                    } : current);
-                    toast.success(def.table === "company_info" && f.name.startsWith("logo_") ? "Variante du logo mise à jour. Elle sera utilisée automatiquement selon le fond." : "Fichier téléversé.");
-                  }
-                    catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
-                    finally { setUploading(null); e.currentTarget.value = ""; }
-                  }} />
-                  {uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}
-                  {editing[f.name] ? <div className="mt-3 flex items-center gap-3 rounded-md bg-muted p-2"><span className="min-w-0 flex-1 truncate text-xs">{String(editing[f.name])}</span><button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-background" onClick={() => setEditing({ ...editing, [f.name]: null })} aria-label={"Supprimer le fichier " + f.label}><X className="h-4 w-4" /></button></div> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier sélectionné.</p>}
-                </div>
-              ) : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects") && f.name === "title" && !editing["id"]) next["slug"] = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
-            </label>
-          ))}
-          <div className="flex gap-2 sm:col-span-2"><Button type="submit" variant="gold" disabled={save.isPending || uploading !== null}>{save.isPending ? "Enregistrement…" : "Enregistrer"}</Button><Button type="button" variant="outline" onClick={() => setEditing(null)}>Annuler</Button></div>
-        </form>
+                      const url = def.table === "company_info" && f.name === "logo_png_url" ? await uploadBrandVariant(file, "png") : def.table === "company_info" && f.name === "logo_jpg_url" ? await uploadBrandVariant(file, "jpg") : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
+                      setEditing((current) => current ? { ...current, [f.name]: url, ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}), ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}), ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {}) } : current);
+                      toast.success("Fichier téléversé.");
+                    } catch (err) { toast.error(err instanceof Error ? err.message : "Téléversement impossible."); } finally { setUploading(null); e.currentTarget.value = ""; }
+                  }} />{uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}{editing[f.name] ? <p className="mt-2 truncate rounded-lg bg-slate-50 p-2 text-xs">{String(editing[f.name])}</p> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier.</p>}</div>
+                  : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects") && f.name === "title" && !editing["id"]) next["slug"] = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
+                </label>
+              ))}
+              <div className="flex gap-2 border-t pt-4 sm:col-span-2"><Button type="submit" variant="gold" disabled={save.isPending || uploading !== null}>{save.isPending ? "Enregistrement…" : "Enregistrer"}</Button><Button type="button" variant="outline" onClick={() => setEditing(null)}>Annuler</Button></div>
+            </form>
+          </div>
+        </div>
       ) : null}
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full text-left text-sm"><thead className="bg-slate-50"><tr>{def.columns.map((c) => <th key={c} className="px-4 py-3 text-xs uppercase tracking-[0.12em]">{c}</th>)}<th className="px-4 py-3" /></tr></thead><tbody>
-        {visibleRows.map((row) => <tr key={String(row["id"])} className="border-t border-slate-100 hover:bg-slate-50/70">{def.columns.map((c) => <td key={c} className="px-4 py-3">{typeof row[c] === "boolean" ? (row[c] ? "Oui" : "Non") : String(row[c] ?? "—")}</td>)}<td className="px-4 py-3 text-right"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
-        {visibleRows.length === 0 ? <tr><td className="px-4 py-6 text-muted-foreground" colSpan={def.columns.length + 1}>Aucun élément.</td></tr> : null}
-      </tbody></table></div>
     </div>
   );
 }
