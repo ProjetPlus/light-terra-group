@@ -13,6 +13,8 @@ export function AiAssistant() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [visitorKey, setVisitorKey] = useState("");
+  const [sessionKey, setSessionKey] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
@@ -21,6 +23,14 @@ export function AiAssistant() {
     },
   ]);
   const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedVisitor = window.localStorage.getItem("ltgroup_ai_visitor_key") || crypto.randomUUID();
+    window.localStorage.setItem("ltgroup_ai_visitor_key", storedVisitor);
+    setVisitorKey(storedVisitor);
+    setSessionKey(crypto.randomUUID());
+  }, []);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: 99999, behavior: "smooth" });
@@ -35,7 +45,11 @@ export function AiAssistant() {
     setLoading(true);
     try {
       const res = await ask({
-        data: { messages: next.filter((m) => m.content).slice(-20) },
+        data: {
+          messages: next.filter((m) => m.content).slice(-30),
+          visitorKey: visitorKey || "anonymous-" + Date.now(),
+          sessionKey: sessionKey || "session-" + Date.now(),
+        },
       });
       setMessages((prev) => [
         ...prev,
@@ -83,7 +97,7 @@ export function AiAssistant() {
             />
             <div className="min-w-0">
               <p className="truncate font-display text-base text-gold">Raï — LT GROUP</p>
-              <p className="text-xs text-ink-foreground/60">Réponses instantanées</p>
+              <p className="text-xs text-ink-foreground/60">Accueil, information et orientation</p>
             </div>
           </div>
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -99,7 +113,7 @@ export function AiAssistant() {
                 {m.content}
               </div>
             ))}
-            {loading ? <p className="text-xs text-muted-foreground">Raï écrit…</p> : null}
+            {loading ? <p className="text-xs text-muted-foreground">Raï réfléchit…</p> : null}
           </div>
           <form
             className="flex items-center gap-2 border-t border-border p-3"
