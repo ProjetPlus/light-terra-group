@@ -102,7 +102,8 @@ const TABLES: TableDef[] = [
       { name: "facebook_url", label: "Facebook", kind: "text" },
       { name: "linkedin_url", label: "LinkedIn", kind: "text" },
       { name: "instagram_url", label: "Instagram", kind: "text" },
-      { name: "logo_url", label: "Logo officiel du groupe", kind: "file", accept: "image/png,image/jpeg,image/webp,image/svg+xml" },
+      { name: "logo_png_url", label: "Logo PNG — fonds clairs / favicon / OG", kind: "file", accept: "image/png" },
+      { name: "logo_jpg_url", label: "Logo JPG — fonds sombres ou colorés (fond blanc intégré)", kind: "file", accept: "image/jpeg" },
     ],
   },
   {
@@ -220,19 +221,18 @@ function safeFileName(name: string) {
   return (base || "fichier") + "-" + crypto.randomUUID() + ext;
 }
 
-async function uploadBrandLogo(file: File) {
+async function uploadBrandVariant(file: File, variant: "png" | "jpg") {
   if (file.size > 10 * 1024 * 1024) throw new Error("Logo trop volumineux (10 Mo maximum).");
-  if (!/^image\/(jpeg|png|webp|svg\+xml)$/i.test(file.type)) throw new Error("Le logo doit être une image PNG, JPG, WEBP ou SVG.");
-  const paths = ["brand/logo.png"];
-  for (const path of paths) {
-    const { error } = await supabase.storage.from("site-media").upload(path, file, {
-      cacheControl: "31536000",
-      upsert: true,
-      contentType: file.type,
-    });
-    if (error) throw new Error(error.message);
-  }
-  return supabase.storage.from("site-media").getPublicUrl("brand/logo.png").data.publicUrl;
+  const expected = variant === "png" ? "image/png" : "image/jpeg";
+  if (file.type !== expected) throw new Error(variant === "png" ? "Chargez uniquement un PNG pour le logo des fonds clairs." : "Chargez uniquement un JPG pour le logo des fonds sombres ou colorés.");
+  const path = variant === "png" ? "brand/logo.png" : "brand/logo.jpg";
+  const { error } = await supabase.storage.from("site-media").upload(path, file, {
+    cacheControl: "31536000",
+    upsert: true,
+    contentType: file.type,
+  });
+  if (error) throw new Error(error.message);
+  return supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
 }
 
 async function uploadSiteFile(file: File, folder: string) {
@@ -673,16 +673,19 @@ function CrudPanel({ def }: { def: TableDef }) {
                   <input type="file" accept={f.accept ?? (def.table === "media_items" && editing["kind"] === "video" ? "video/*" : "image/*,video/*")} className="block w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
                     try {
-                    const url = def.table === "company_info" && f.name === "logo_url"
-                      ? await uploadBrandLogo(file)
-                      : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
+                    const url = def.table === "company_info" && f.name === "logo_png_url"
+                      ? await uploadBrandVariant(file, "png")
+                      : def.table === "company_info" && f.name === "logo_jpg_url"
+                        ? await uploadBrandVariant(file, "jpg")
+                        : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
                     setEditing((current) => current ? {
                       ...current,
                       [f.name]: url,
                       ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}),
                       ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}),
+                      ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {}),
                     } : current);
-                    toast.success(def.table === "company_info" && f.name === "logo_url" ? "Logo officiel mis à jour. Il remplace le logo du site, l’OG et le favicon." : "Fichier téléversé.");
+                    toast.success(def.table === "company_info" && f.name.startsWith("logo_") ? "Variante du logo mise à jour. Elle sera utilisée automatiquement selon le fond." : "Fichier téléversé.");
                   }
                     catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
                     finally { setUploading(null); e.currentTarget.value = ""; }
