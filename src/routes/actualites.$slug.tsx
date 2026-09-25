@@ -73,14 +73,14 @@ function Page() {
             <p className="eyebrow">À découvrir également</p>
             <div className="mt-6 grid gap-6 md:grid-cols-2">
               {related.map((news) => (
-                <Link key={news.id} to={"/actualites/$slug" as never} params={{ slug: news.slug } as never} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+                <a key={news.id} href={`/actualites/${news.slug}`} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
                   {news.cover_image_url || news.image_url || news.video_url ? <MediaPreview url={news.cover_image_url || news.image_url || news.video_url || ""} alt={news.title} poster={news.video_poster_url} className="h-48 w-full object-cover" /> : null}
                   <div className="p-5">
                     <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(news.published_at ?? news.created_at)}</p>
                     <h2 className="mt-2 text-xl">{news.title}</h2>
                     {news.excerpt ? <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{news.excerpt}</p> : null}
                   </div>
-                </Link>
+                </a>
               ))}
             </div>
           </section>
