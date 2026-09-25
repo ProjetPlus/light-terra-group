@@ -7,8 +7,8 @@ import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
 import { MediaPreview } from "@/components/site/MediaPreview";
 import { projectsQuery } from "@/lib/site-data";
 
-const title = "Projets & réalisations — LIGHT TERRA GROUP";
-const description = "Découvrez les projets fonciers, immobiliers et électriques réalisés par LIGHT TERRA GROUP.";
+const title = "Projets & réalisations — LT GROUP";
+const description = "Découvrez les projets fonciers, immobiliers et électriques réalisés par LT GROUP.";
 
 export const Route = createFileRoute("/projets")({
   head: () => ({
