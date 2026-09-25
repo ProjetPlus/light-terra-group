@@ -171,9 +171,9 @@ function Hero() {
           </h1>
           {list[index]?.subtitle ? <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/80">{list[index]?.subtitle}</p> : null}
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</a></Button>
+            <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</Link></Button>
             <Button asChild size="lg" variant="outline" className="border-gold/50 bg-transparent text-ink-foreground hover:bg-gold hover:text-ink">
-              <Link to="/projets">Voir nos réalisations</a>
+              <Link to="/projets">Voir nos réalisations</Link>
             </Button>
           </div>
 
@@ -320,11 +320,11 @@ function Activities() {
               <h3 className="mt-5 text-xl">{activity.title}</h3>
               {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 aspect-[16/9] w-full rounded-md object-cover" /> : null}
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{activity.short_description}</p>
-            </a>
+            </Link>
           );
         })}
       </div>
-      <div className="mt-10"><Button asChild variant="outline"><Link to="/activites">Découvrir nos activités <ArrowRight className="ml-2 h-4 w-4" /></a></Button></div>
+      <div className="mt-10"><Button asChild variant="outline"><Link to="/activites">Découvrir nos activités <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>
     </section>
   );
 }
@@ -352,7 +352,7 @@ function FeaturedProjects() {
             </a>
           ))}
         </div>
-        <div className="mt-10"><Button asChild variant="gold"><Link to="/projets">Tous nos projets</a></Button></div>
+        <div className="mt-10"><Button asChild variant="gold"><Link to="/projets">Tous nos projets</Link></Button></div>
       </div>
     </section>
   );
@@ -381,7 +381,7 @@ function LatestNews() {
           </a>
         ))}
       </div>
-      <div className="mt-10"><Button asChild variant="outline"><Link to="/actualites">Toutes les actualités</a></Button></div>
+      <div className="mt-10"><Button asChild variant="outline"><Link to="/actualites">Toutes les actualités</Link></Button></div>
     </section>
   );
 }
@@ -396,7 +396,7 @@ function CallToAction() {
           <p className="mt-4 max-w-xl text-ink-foreground/70">Nos équipes vous accompagnent de l'étude à la livraison. Décrivez votre besoin, nous revenons vers vous rapidement.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</a></Button>
+          <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</Link></Button>
           {company?.phone_primary ? (
             <Button asChild size="lg" variant="outline" className="border-gold/50 bg-transparent text-ink-foreground hover:bg-gold hover:text-ink">
               <a href={`tel:${company.phone_primary.replace(/\s/g, "")}`}>{company.phone_primary}</a>
