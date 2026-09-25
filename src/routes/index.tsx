@@ -317,6 +317,7 @@ function Activities() {
             <Link key={activity.id} to="/activites/$slug" params={{ slug: activity.slug }} className="group rounded-lg border border-border bg-card p-7 transition hover:-translate-y-1 hover:shadow-elevated">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-sm bg-accent text-gold-deep"><Icon className="h-6 w-6" /></span>
               <h3 className="mt-5 text-xl">{activity.title}</h3>
+              {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 aspect-[16/9] w-full rounded-md object-cover" /> : null}
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{activity.short_description}</p>
             </Link>
           );
@@ -341,7 +342,7 @@ function FeaturedProjects() {
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {list.map((project) => (
             <Link to="/projets/$slug" params={{ slug: project.slug }} key={project.id} className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
-              {project.image_url ? <MediaPreview url={project.image_url} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
+              {project.cover_image_url || project.image_url ? <MediaPreview url={project.cover_image_url || project.image_url || ""} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
               <div className="p-6">
                 <p className="eyebrow">{project.category ?? "Projet"}</p>
                 <h3 className="mt-2 text-lg">{project.title}</h3>
@@ -369,7 +370,7 @@ function LatestNews() {
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {list.map((item) => (
           <Link key={item.id} to="/actualites/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
-            {item.image_url || item.video_url ? <MediaPreview url={item.image_url ?? item.video_url} alt={item.title} poster={item.video_poster_url} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : null}
+            {item.cover_image_url || item.image_url || item.video_url ? <MediaPreview url={item.cover_image_url ?? item.image_url ?? item.video_url alt={item.title} poster={item.video_poster_url} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : null}
             <div className="p-6">
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(item.published_at ?? item.created_at)}</p>
               <h3 className="mt-3 text-lg">{item.title}</h3>
