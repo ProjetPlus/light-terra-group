@@ -7,8 +7,13 @@ import { projectItemQuery, projectsQuery } from "@/lib/site-data";
 
 const STATUS_LABEL: Record<string, string> = { en_cours: "En cours", termine: "Terminé", a_venir: "À venir" };
 export const Route = createFileRoute("/projets/$slug")({
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(projectItemQuery(params.slug)),
-  head: ({ loaderData }) => ({ meta: [{ title: loaderData?.title ? `${loaderData.title} — LT GROUP` : "Projet — LT GROUP" }, { name: "description", content: loaderData?.summary ?? "Projet LT GROUP." }, { property: "og:image", content: loaderData?.image_url ?? "/media/og-light-terra.png" }] }),
+  head: () => ({
+    meta: [
+      { title: "Projet — LT GROUP" },
+      { name: "description", content: "Découvrez ce projet de LT GROUP." },
+      { property: "og:image", content: "/media/og-light-terra.png" },
+    ],
+  }),
   component: Page,
 });
 
@@ -22,7 +27,7 @@ function Page() {
   return <SiteLayout>
     <PageHero eyebrow={project.category ?? "Projet"} title={project.title} description={project.summary ?? ""} />
     <article className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
-      {project.cover_image_url ? <img src={project.cover_image_url} alt={project.title} className="max-h-[520px] w-full rounded-2xl object-cover shadow-elevated" /> : null}{project.image_url ? <div className="mt-6"><MediaPreview url={project.image_url} alt={`${project.title} — média`} className="max-h-[650px] w-full rounded-2xl object-cover shadow-elevated" controls /></div> : null}
+      {project.cover_image_url ? <MediaPreview url={project.cover_image_url} alt={project.title + " — couverture"} className="max-h-[520px] w-full rounded-2xl object-cover shadow-elevated" /> : null}{project.image_url ? <div className="mt-6"><MediaPreview url={project.image_url} alt={`${project.title} — média`} className="max-h-[650px] w-full rounded-2xl object-cover shadow-elevated" controls /></div> : null}
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_280px]"><div>
         <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">{project.category ? <span>{project.category}</span> : null}<span className="rounded-full bg-accent px-3 py-1 text-gold-deep">{STATUS_LABEL[project.status] ?? project.status}</span></div>
         {project.content ? <div className="mt-8 whitespace-pre-line text-base leading-8 text-foreground/80">{project.content}</div> : null}
