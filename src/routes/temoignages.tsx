@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateFr, testimonialsQuery } from "@/lib/site-data";
 
-const title = "Témoignages — LIGHT TERRA GROUP";
-const description = "Les retours de nos clients et partenaires sur les projets menés par LIGHT TERRA GROUP.";
+const title = "Témoignages — LT GROUP";
+const description = "Les retours de nos clients et partenaires sur les projets menés par LT GROUP.";
 
 export const Route = createFileRoute("/temoignages")({
   head: () => ({
