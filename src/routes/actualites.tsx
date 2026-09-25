@@ -40,10 +40,9 @@ function Page() {
           {list.map((item) => {
             const mediaUrl = item.cover_image_url ?? item.image_url ?? item.video_url;
             return (
-              <Link
+              <a
                 key={item.id}
-                to="/actualites/$slug"
-                params={{ slug: item.slug }}
+                href={`/actualites/${item.slug}`}
                 className="group grid gap-6 overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated md:grid-cols-[280px_1fr]"
               >
                 {mediaUrl ? (
@@ -65,7 +64,7 @@ function Page() {
                   <p className="mt-3 leading-relaxed text-muted-foreground">{item.excerpt}</p>
                   <span className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">Lire l’actualité →</span>
                 </div>
-              </Link>
+              </a>
             );
           })}       </div>
       </section>
