@@ -50,6 +50,88 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_conversation_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversation_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_conversations: {
+        Row: {
+          assigned_to: string | null
+          id: string
+          intent: string | null
+          last_message_at: string
+          metadata: Json
+          session_key: string
+          started_at: string
+          status: string
+          summary: string | null
+          visitor_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          id?: string
+          intent?: string | null
+          last_message_at?: string
+          metadata?: Json
+          session_key: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+          visitor_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          id?: string
+          intent?: string | null
+          last_message_at?: string
+          metadata?: Json
+          session_key?: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "ai_visitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_knowledge: {
         Row: {
           answer: string
@@ -77,6 +159,72 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_visitors: {
+        Row: {
+          budget_range: string | null
+          city: string | null
+          company: string | null
+          consent_contact: boolean
+          country: string | null
+          desired_date: string | null
+          email: string | null
+          first_seen_at: string
+          full_name: string | null
+          id: string
+          last_seen_at: string
+          metadata: Json
+          notes: string | null
+          phone: string | null
+          project_type: string | null
+          request_type: string | null
+          source: string | null
+          status: string
+          visitor_key: string
+        }
+        Insert: {
+          budget_range?: string | null
+          city?: string | null
+          company?: string | null
+          consent_contact?: boolean
+          country?: string | null
+          desired_date?: string | null
+          email?: string | null
+          first_seen_at?: string
+          full_name?: string | null
+          id?: string
+          last_seen_at?: string
+          metadata?: Json
+          notes?: string | null
+          phone?: string | null
+          project_type?: string | null
+          request_type?: string | null
+          source?: string | null
+          status?: string
+          visitor_key: string
+        }
+        Update: {
+          budget_range?: string | null
+          city?: string | null
+          company?: string | null
+          consent_contact?: boolean
+          country?: string | null
+          desired_date?: string | null
+          email?: string | null
+          first_seen_at?: string
+          full_name?: string | null
+          id?: string
+          last_seen_at?: string
+          metadata?: Json
+          notes?: string | null
+          phone?: string | null
+          project_type?: string | null
+          request_type?: string | null
+          source?: string | null
+          status?: string
+          visitor_key?: string
+        }
+        Relationships: []
+      }
       company_info: {
         Row: {
           address: string | null
@@ -89,6 +237,9 @@ export type Database = {
           instagram_url: string | null
           latitude: number | null
           linkedin_url: string | null
+          logo_jpg_url: string | null
+          logo_png_url: string | null
+          logo_url: string | null
           longitude: number | null
           name: string
           opening_hours: string | null
@@ -110,6 +261,9 @@ export type Database = {
           instagram_url?: string | null
           latitude?: number | null
           linkedin_url?: string | null
+          logo_jpg_url?: string | null
+          logo_png_url?: string | null
+          logo_url?: string | null
           longitude?: number | null
           name: string
           opening_hours?: string | null
@@ -131,6 +285,9 @@ export type Database = {
           instagram_url?: string | null
           latitude?: number | null
           linkedin_url?: string | null
+          logo_jpg_url?: string | null
+          logo_png_url?: string | null
+          logo_url?: string | null
           longitude?: number | null
           name?: string
           opening_hours?: string | null
@@ -315,6 +472,7 @@ export type Database = {
         Row: {
           author: string | null
           content: string | null
+          cover_image_url: string | null
           created_at: string
           excerpt: string | null
           id: string
@@ -323,11 +481,14 @@ export type Database = {
           published_at: string | null
           slug: string
           title: string
+          video_poster_url: string | null
+          video_url: string | null
           view_count: number
         }
         Insert: {
           author?: string | null
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
@@ -336,11 +497,14 @@ export type Database = {
           published_at?: string | null
           slug: string
           title: string
+          video_poster_url?: string | null
+          video_url?: string | null
           view_count?: number
         }
         Update: {
           author?: string | null
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
@@ -349,7 +513,90 @@ export type Database = {
           published_at?: string | null
           slug?: string
           title?: string
+          video_poster_url?: string | null
+          video_url?: string | null
           view_count?: number
+        }
+        Relationships: []
+      }
+      newsletter_deliveries: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          news_id: string
+          sent_at: string | null
+          status: string
+          subscriber_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          news_id: string
+          sent_at?: string | null
+          status?: string
+          subscriber_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          news_id?: string
+          sent_at?: string | null
+          status?: string
+          subscriber_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_deliveries_news_id_fkey"
+            columns: ["news_id"]
+            isOneToOne: false
+            referencedRelation: "news"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_deliveries_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          source: string
+          status: string
+          updated_at: string
+          welcome_sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+          source?: string
+          status?: string
+          updated_at?: string
+          welcome_sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          source?: string
+          status?: string
+          updated_at?: string
+          welcome_sent_at?: string | null
         }
         Relationships: []
       }
@@ -384,6 +631,7 @@ export type Database = {
         Row: {
           category: string | null
           content: string | null
+          cover_image_url: string | null
           created_at: string
           id: string
           image_url: string | null
@@ -399,6 +647,7 @@ export type Database = {
         Insert: {
           category?: string | null
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
@@ -414,6 +663,7 @@ export type Database = {
         Update: {
           category?: string | null
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
