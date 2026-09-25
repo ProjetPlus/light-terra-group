@@ -189,6 +189,21 @@ export const activitiesQuery = queryOptions({
     ),
 });
 
+export const activityItemQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["activities", "public", slug],
+    queryFn: async (): Promise<Activity | null> => {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data as Activity | null;
+    },
+  });
+
 export const projectsQuery = queryOptions({
   queryKey: ["projects", "public"],
   queryFn: async (): Promise<Project[]> =>
