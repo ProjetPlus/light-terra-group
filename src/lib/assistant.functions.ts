@@ -134,6 +134,9 @@ function localReply(question: string, ctx: SiteContext) {
     value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const nq = normalize(question);
+  if (/^(salut|slt|bonjour|bonsoir|hello|coucou|hey|yo|ca va|ça va)\\b/.test(nq)) {
+    return "Bonjour ! Je suis Raï, l’assistante virtuelle de LT GROUP. Je peux vous renseigner sur nos activités, nos projets, nos actualités, nos terrains et nos services, ou vous aider à préparer une demande de devis. Que souhaitez-vous savoir ?";
+  }
   const scored = ctx.knowledge
     .filter((item) => item.is_active)
     .map((item) => {
