@@ -8,7 +8,7 @@ import { projectItemQuery, projectsQuery } from "@/lib/site-data";
 const STATUS_LABEL: Record<string, string> = { en_cours: "En cours", termine: "Terminé", a_venir: "À venir" };
 export const Route = createFileRoute("/projets/$slug")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(projectItemQuery(params.slug)),
-  head: ({ loaderData }) => ({ meta: [{ title: loaderData?.title ? `${loaderData.title} — LIGHT TERRA GROUP` : "Projet — LIGHT TERRA GROUP" }, { name: "description", content: loaderData?.summary ?? "Projet LIGHT TERRA GROUP." }, { property: "og:image", content: loaderData?.image_url ?? "/media/og-light-terra.png" }] }),
+  head: ({ loaderData }) => ({ meta: [{ title: loaderData?.title ? `${loaderData.title} — LT GROUP` : "Projet — LT GROUP" }, { name: "description", content: loaderData?.summary ?? "Projet LT GROUP." }, { property: "og:image", content: loaderData?.image_url ?? "/media/og-light-terra.png" }] }),
   component: Page,
 });
 
