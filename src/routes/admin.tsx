@@ -16,11 +16,11 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Tableau de bord — LIGHT TERRA GROUP" },
-      { name: "description", content: "Administration du site LIGHT TERRA GROUP." },
+      { title: "Tableau de bord — LT GROUP" },
+      { name: "description", content: "Administration du site LT GROUP." },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Tableau de bord — LIGHT TERRA GROUP" },
-      { property: "og:description", content: "Administration du site LIGHT TERRA GROUP." },
+      { property: "og:title", content: "Tableau de bord — LT GROUP" },
+      { property: "og:description", content: "Administration du site LT GROUP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -256,7 +256,7 @@ function newRowFor(def: TableDef, rows: Row[]) {
   if (def.table === "hero_slides") Object.assign(row, { position: first, duration_ms: 6000, is_active: true });
   if (def.table === "activities") Object.assign(row, { position: first, is_active: true });
   if (def.table === "ai_knowledge") Object.assign(row, { position: first, is_active: true });
-  if (def.table === "company_info") Object.assign(row, { name: "LIGHT TERRA GROUP", slogan: "Bâtir la terre, éclairer l’avenir" });
+  if (def.table === "company_info") Object.assign(row, { name: "LT GROUP", slogan: "Bâtir la terre, éclairer l’avenir" });
   return row;
 }
 
@@ -302,7 +302,7 @@ function AdminPage() {
       <aside className={"fixed inset-y-0 left-0 z-50 w-[280px] border-r border-white/10 bg-[#0b1f18] text-ink-foreground transition-transform lg:translate-x-0 " + (mobileOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex h-full flex-col shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
-            <img src={company?.logo_jpg_url || company?.logo_url || LOGO_URL} alt="LIGHT TERRA GROUP" className="h-10 w-auto" />
+            <img src={company?.logo_jpg_url || company?.logo_url || LOGO_URL} alt="LT GROUP" className="h-10 w-auto" />
             <button type="button" className="rounded-md p-2 hover:bg-white/10 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
               <X className="h-5 w-5" />
             </button>
@@ -334,7 +334,7 @@ function AdminPage() {
                 <Menu className="h-5 w-5" />
               </button>
               <div>
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">LIGHT TERRA GROUP</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">LT GROUP</p>
                 <h1 className="text-lg">{TABLES.find((t) => t.key === tab)?.label ?? "Demandes"}</h1>
               </div>
             </div>
@@ -653,7 +653,7 @@ function CrudPanel({ def }: { def: TableDef }) {
           <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="bg-slate-50"><tr>{def.columns.map((column) => <th key={column} className="whitespace-nowrap px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{column.replaceAll("_", " ")}</th>)}<th className="px-4 py-3" /></tr></thead>
             <tbody>
-              {rows.map((row) => <tr key={String(row["id"])} className="border-t border-slate-100 hover:bg-slate-50/70">{def.columns.map((column) => <td key={column} className="max-w-[280px] truncate px-4 py-3">{typeof row[column] === "boolean" ? (row[column] ? "Oui" : "Non") : String(row[column] ?? "—")}</td>)}<td className="px-4 py-3"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
+              {rows.map((row) => <tr key={String(row["id"])} className="border-t border-slate-100 hover:bg-slate-50/70">{def.columns.map((column) => <td key={column} className="max-w-[280px] truncate px-4 py-3">{typeof row[column] === "boolean" ? (row[column] ? "Oui" : "Non") : String(row[column] ?? "—")}</td>)}<td className="px-4 py-3"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setEditing(row)}>{def.table === "testimonials" ? "Modérer" : "Modifier"}</Button>{def.table !== "testimonials" && def.table !== "company_info" ? <Button size="sm" variant="outline" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div></td></tr>)}
             </tbody>
           </table>
         </div>
@@ -662,7 +662,7 @@ function CrudPanel({ def }: { def: TableDef }) {
       <div className="grid gap-3 md:hidden">
         {rows.map((row) => <div key={String(row["id"])} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="space-y-2">{def.columns.slice(0, 4).map((column) => <div key={column} className="flex min-w-0 justify-between gap-4 text-sm"><span className="shrink-0 text-xs uppercase tracking-wide text-muted-foreground">{column.replaceAll("_", " ")}</span><span className="min-w-0 truncate text-right font-medium">{typeof row[column] === "boolean" ? (row[column] ? "Oui" : "Non") : String(row[column] ?? "—")}</span></div>)}</div>
-          <div className="mt-4 flex gap-2"><Button size="sm" variant="outline" className="flex-1" onClick={() => setEditing(row)}>Modifier</Button>{def.table !== "testimonials" ? <Button size="sm" variant="outline" className="flex-1" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div>
+          <div className="mt-4 flex gap-2"><Button size="sm" variant="outline" className="flex-1" onClick={() => setEditing(row)}>Modifier</Button>{def.table !== "testimonials" && def.table !== "company_info" ? <Button size="sm" variant="outline" className="flex-1" onClick={() => { if (confirm("Supprimer cet élément ?")) remove.mutate(String(row["id"])); }}>Supprimer</Button> : null}</div>
         </div>)}
         {!rows.length ? <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">Aucun élément.</div> : null}
       </div>
@@ -683,7 +683,7 @@ function CrudPanel({ def }: { def: TableDef }) {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
                     try {
                       const url = def.table === "company_info" && f.name === "logo_png_url" ? await uploadBrandVariant(file, "png") : def.table === "company_info" && f.name === "logo_jpg_url" ? await uploadBrandVariant(file, "jpg") : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
-                      setEditing((current) => current ? { ...current, [f.name]: url, ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}), ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}), ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {}) } : current);
+                      setEditing((current) => current ? { ...current, [f.name]: url, ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}), ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}), ...(def.table === "news" && f.name === "video_url" ? { image_url: null } : {}), ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {}) } : current);
                       toast.success("Fichier téléversé.");
                     } catch (err) { toast.error(err instanceof Error ? err.message : "Téléversement impossible."); } finally { setUploading(null); e.currentTarget.value = ""; }
                   }} />{uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}{editing[f.name] ? <p className="mt-2 truncate rounded-lg bg-slate-50 p-2 text-xs">{String(editing[f.name])}</p> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier.</p>}</div>
