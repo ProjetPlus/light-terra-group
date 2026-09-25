@@ -147,7 +147,7 @@ export const notifyNewsSubscribers = createServerFn({ method: "POST" })
         await db.from("newsletter_deliveries").update({ status: "sent", sent_at: new Date().toISOString(), error_message: null }).eq("subscriber_id", subscriber.id).eq("news_id", news.id);
         sent++;
       } catch (error) {
-        await db.from("newsletter_deliveries").update({ status: "failed", error_message: error instanceof Error ? error.message.slice(0, 500) : "Erreur d'envoi" }).eq("id", delivery.id);
+        await db.from("newsletter_deliveries").update({ status: "failed", error_message: error instanceof Error ? error.message.slice(0, 500) : "Erreur d'envoi" }).eq("id", deliveryId);
       }
     }
 
