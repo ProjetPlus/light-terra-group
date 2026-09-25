@@ -7,7 +7,7 @@ import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { submitRequest } from "@/lib/requests.functions";
 
-const title = "Services & devis — LIGHT TERRA GROUP";
+const title = "Services & devis — LT GROUP";
 const description =
   "Demandez un devis personnalisé : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification.";
 
