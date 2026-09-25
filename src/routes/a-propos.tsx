@@ -5,9 +5,9 @@ import { Eye, Gem, Target } from "lucide-react";
 import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
 import { activitiesQuery, companyQuery } from "@/lib/site-data";
 
-const title = "À propos — LIGHT TERRA GROUP";
+const title = "À propos — LT GROUP";
 const description =
-  "LIGHT TERRA GROUP, groupe ivoirien spécialisé dans l'aménagement foncier, la construction, l'immobilier et les infrastructures électriques.";
+  "LT GROUP, groupe ivoirien spécialisé dans l'aménagement foncier, la construction, l'immobilier et les infrastructures électriques.";
 
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
@@ -49,7 +49,7 @@ function Page() {
     <SiteLayout>
       <PageHero
         eyebrow="À propos"
-        title={company?.name ?? "LIGHT TERRA GROUP"}
+        title={company?.name ?? "LT GROUP"}
         description={company?.slogan ?? "Bâtir la terre, éclairer l'avenir"}
       />
 
@@ -61,7 +61,7 @@ function Page() {
             <hr className="gold-rule mt-6 w-24" />
             <p className="mt-6 leading-relaxed text-muted-foreground">
               {company?.description ??
-                "LIGHT TERRA GROUP intervient sur toute la chaîne de valeur : identification et sécurisation du foncier, viabilisation, construction, promotion immobilière et infrastructures électriques."}
+                "LT GROUP intervient sur toute la chaîne de valeur : identification et sécurisation du foncier, viabilisation, construction, promotion immobilière et infrastructures électriques."}
             </p>
             {company?.address ? (
               <p className="mt-6 text-sm text-muted-foreground">
