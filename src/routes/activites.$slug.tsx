@@ -63,10 +63,10 @@ function Page() {
           <p className="eyebrow">Réalisations liées</p>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
             {relatedProjects.map((project) => (
-              <Link key={project.id} to={"/projets/$slug" as never} params={{ slug: project.slug } as never} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+              <a key={project.id} href={`/projets/${project.slug}`} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
                 {project.cover_image_url || project.image_url ? <MediaPreview url={project.cover_image_url || project.image_url || ""} alt={project.title} className="h-44 w-full object-cover" /> : null}
                 <div className="p-5"><h3 className="text-lg">{project.title}</h3><p className="mt-2 text-sm text-muted-foreground">{project.summary}</p></div>
-              </Link>
+              </a>
             ))}
           </div>
         </section>
@@ -77,10 +77,10 @@ function Page() {
           <p className="eyebrow">Explorer nos autres pôles</p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {otherActivities.map((item) => (
-              <Link key={item.id} to={"/activites/$slug" as never} params={{ slug: item.slug } as never} className="rounded-xl border border-border bg-card p-5 transition hover:-translate-y-1 hover:shadow-elevated">
+              <a key={item.id} href={`/activites/${item.slug}`} className="rounded-xl border border-border bg-card p-5 transition hover:-translate-y-1 hover:shadow-elevated">
                 <h3 className="text-lg">{item.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{item.short_description}</p>
-              </Link>
+              </a>
             ))}
           </div>
         </section>
