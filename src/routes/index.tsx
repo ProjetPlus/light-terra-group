@@ -15,6 +15,7 @@ import {
 import { PartnersStrip, SiteFooter, SiteHeader } from "@/components/site/SiteLayout";
 import { AiAssistant } from "@/components/site/AiAssistant";
 import { MediaGallery } from "@/components/site/MediaGallery";
+import { MediaPreview, isVideoMedia } from "@/components/site/MediaPreview";
 import { Button } from "@/components/ui/button";
 import { OG_IMAGE_URL, SITE_URL } from "@/lib/media";
 import {
@@ -97,6 +98,30 @@ function IntroVideoLoop() {
     first.addEventListener("canplay", play, { once: true });
     return () => first.removeEventListener("canplay", play);
   }, [list]);
+
+  const hasNonVideoMedia = list.some((item) => !isVideoMedia(item.video_url));
+  useEffect(() => {
+    if (!hasNonVideoMedia || list.length < 2) return;
+    const timer = window.setInterval(() => setActive((i) => (i + 1) % list.length), 6500);
+    return () => window.clearInterval(timer);
+  }, [hasNonVideoMedia, list.length]);
+
+  if (hasNonVideoMedia) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-lg border border-gold/25 bg-black shadow-elevated">
+        {list.map((item, i) => (
+          <MediaPreview
+            key={item.id}
+            url={item.video_url}
+            alt={item.title ?? item.label}
+            className={"absolute inset-0 h-full w-full object-cover transition-opacity duration-700 " + (i === active ? "opacity-100" : "opacity-0")}
+            autoPlay={isVideoMedia(item.video_url) && i === active}
+            loop
+          />
+        ))}
+      </div>
+    );
+  }
 
   const next = list.length > 1 ? (active + 1) % list.length : active;
 
@@ -184,10 +209,12 @@ function Hero() {
     <section className="relative w-full overflow-hidden bg-ink">
       {list.map((slide, i) => (
         <div key={slide.id} className="absolute inset-0 transition-opacity duration-1000" style={{ opacity: i === index ? 1 : 0 }} aria-hidden={i !== index}>
-          <img
-            src={slide.image_url}
+          <MediaPreview
+            url={slide.image_url}
             alt={slide.title ?? "LIGHT TERRA GROUP"}
             className={i === index ? "h-full w-full object-cover animate-slow-zoom" : "h-full w-full object-cover"}
+            autoPlay={isVideoMedia(slide.image_url) && i === index}
+            loop
           />
           <div className="absolute inset-0 bg-veil" />
         </div>
@@ -354,11 +381,11 @@ function Activities() {
         {activities.map((activity) => {
           const Icon = ACTIVITY_ICONS[activity.icon ?? ""] ?? Building2;
           return (
-            <article key={activity.id} className="group rounded-lg border border-border bg-card p-7 transition hover:-translate-y-1 hover:shadow-elevated">
+            <Link key={activity.id} to="/activites/$slug" params={{ slug: activity.slug }} className="group rounded-lg border border-border bg-card p-7 transition hover:-translate-y-1 hover:shadow-elevated">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-sm bg-accent text-gold-deep"><Icon className="h-6 w-6" /></span>
               <h3 className="mt-5 text-xl">{activity.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{activity.short_description}</p>
-            </article>
+            </Link>
           );
         })}
       </div>
@@ -380,14 +407,14 @@ function FeaturedProjects() {
         <hr className="gold-rule mt-6 w-24" />
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {list.map((project) => (
-            <article key={project.id} className="overflow-hidden rounded-lg border border-border bg-card">
-              {project.image_url ? <img src={project.image_url} alt={project.title} loading="lazy" className="aspect-[4/3] w-full object-cover" /> : null}
+            <Link to="/projets/$slug" params={{ slug: project.slug }} key={project.id} className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+              {project.image_url ? <MediaPreview url={project.image_url} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
               <div className="p-6">
                 <p className="eyebrow">{project.category ?? "Projet"}</p>
                 <h3 className="mt-2 text-lg">{project.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{project.summary}</p>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
         <div className="mt-10"><Button asChild variant="gold"><Link to="/projets">Tous nos projets</Link></Button></div>
