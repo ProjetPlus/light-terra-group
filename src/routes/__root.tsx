@@ -128,7 +128,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: ReactNode }) {\n  const company = Route.useLoaderData();\n  const configuredLogo = company?.logo_png_url || company?.logo_url || LOGO_URL;
+function RootShell({ children }: { children: ReactNode }) {
+  const company = Route.useLoaderData();
+  const configuredLogo = company?.logo_png_url || company?.logo_url || LOGO_URL;
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
