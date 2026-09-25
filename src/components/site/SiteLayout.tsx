@@ -36,7 +36,7 @@ export function SiteHeader() {
           <img
             src={company?.logo_png_url || company?.logo_url || LOGO_URL}
             alt="Logo LT GROUP"
-            className="h-10 w-auto max-w-[190px] shrink-0 object-contain lg:h-12 lg:max-w-[230px]"
+            className="h-11 w-auto max-w-[210px] shrink-0 object-contain lg:h-14 lg:max-w-[250px]"
             width={600}
             height={400}
           />
