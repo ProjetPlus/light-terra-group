@@ -58,7 +58,7 @@ const TABLES: TableDef[] = [
     fields: [
       { name: "title", label: "Titre", kind: "text" },
       { name: "subtitle", label: "Sous-titre", kind: "textarea" },
-      { name: "image_url", label: "Visuel", kind: "file", required: true, accept: "image/*" },
+      { name: "image_url", label: "Média (photo ou vidéo)", kind: "file", required: true, accept: "image/*,video/*" },
       { name: "cta_label", label: "Bouton", kind: "text" },
       { name: "cta_url", label: "Lien du bouton", kind: "text" },
       { name: "duration_ms", label: "Durée (ms)", kind: "number" },
@@ -76,7 +76,7 @@ const TABLES: TableDef[] = [
       { name: "short_description", label: "Résumé", kind: "textarea", required: true },
       { name: "description", label: "Description", kind: "textarea" },
       { name: "icon", label: "Icône", kind: "text" },
-      { name: "image_url", label: "Image", kind: "file", accept: "image/*" },
+      { name: "image_url", label: "Média (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
       { name: "position", label: "Ordre", kind: "number" },
       { name: "is_active", label: "Actif", kind: "boolean" },
     ],
@@ -125,7 +125,7 @@ const TABLES: TableDef[] = [
       { name: "title", label: "Titre affiché", kind: "text" },
       { name: "description", label: "Description", kind: "textarea" },
       { name: "placement", label: "Emplacement", kind: "select", options: ["hero_intro", "home_showcase"] },
-      { name: "video_url", label: "Vidéo", kind: "file", required: true, accept: "video/mp4,video/webm,video/quicktime" },
+      { name: "video_url", label: "Média (photo ou vidéo)", kind: "file", required: true, accept: "image/*,video/*" },
       { name: "cta_label", label: "Bouton", kind: "text" },
       { name: "cta_url", label: "Lien", kind: "text" },
       { name: "position", label: "Ordre dans la section", kind: "number" },
@@ -142,7 +142,7 @@ const TABLES: TableDef[] = [
       { name: "slug", label: "Identifiant", kind: "text", required: true },
       { name: "excerpt", label: "Résumé", kind: "textarea" },
       { name: "content", label: "Contenu", kind: "textarea" },
-      { name: "image_url", label: "Image de couverture", kind: "file", accept: "image/*" },
+      { name: "image_url", label: "Média principal (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
       { name: "author", label: "Auteur", kind: "text" },
       { name: "published_at", label: "Date de publication", kind: "text" },
       { name: "is_published", label: "Publiée", kind: "boolean" },
@@ -159,7 +159,7 @@ const TABLES: TableDef[] = [
       { name: "slug", label: "Identifiant", kind: "text", required: true },
       { name: "summary", label: "Résumé", kind: "textarea" },
       { name: "content", label: "Description", kind: "textarea" },
-      { name: "image_url", label: "Photo", kind: "file", accept: "image/*" },
+      { name: "image_url", label: "Média principal (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
       { name: "category", label: "Pôle d'activité", kind: "select" },
       { name: "location", label: "Localisation", kind: "text" },
       { name: "status", label: "État", kind: "select", options: ["en_cours", "termine", "a_venir"] },
@@ -183,7 +183,7 @@ const TABLES: TableDef[] = [
     columns: ["name", "is_active"], create: true,
     fields: [
       { name: "name", label: "Nom", kind: "text", required: true },
-      { name: "logo_url", label: "Logo", kind: "file", accept: "image/*" },
+      { name: "logo_url", label: "Logo / média (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
       { name: "website_url", label: "Site web", kind: "text" },
       { name: "position", label: "Ordre", kind: "number" },
       { name: "is_active", label: "Actif", kind: "boolean" },
@@ -197,7 +197,7 @@ const TABLES: TableDef[] = [
       { name: "kind", label: "Type", kind: "select", options: ["photo", "video"], required: true },
       { name: "title", label: "Titre", kind: "text" },
       { name: "description", label: "Description", kind: "textarea" },
-      { name: "url", label: "Fichier", kind: "file", required: true },
+      { name: "url", label: "Fichier (photo ou vidéo)", kind: "file", required: true, accept: "image/*,video/*" },
       { name: "poster_url", label: "Image de couverture (vidéo)", kind: "file", accept: "image/*" },
       { name: "position", label: "Ordre", kind: "number" },
       { name: "is_active", label: "Actif", kind: "boolean" },
@@ -676,7 +676,12 @@ function CrudPanel({ def }: { def: TableDef }) {
                     const url = def.table === "company_info" && f.name === "logo_url"
                       ? await uploadBrandLogo(file)
                       : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
-                    setEditing((current) => current ? { ...current, [f.name]: url } : current);
+                    setEditing((current) => current ? {
+                      ...current,
+                      [f.name]: url,
+                      ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}),
+                      ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}),
+                    } : current);
                     toast.success(def.table === "company_info" && f.name === "logo_url" ? "Logo officiel mis à jour. Il remplace le logo du site, l’OG et le favicon." : "Fichier téléversé.");
                   }
                     catch (error) { toast.error(error instanceof Error ? error.message : "Téléversement impossible."); }
