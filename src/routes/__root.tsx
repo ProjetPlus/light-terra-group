@@ -15,10 +15,10 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LOGO_URL, SITE_URL, OG_IMAGE_URL } from "@/lib/media";
 import { companyQuery } from "@/lib/site-data";
 
-const SITE_NAME = "LIGHT TERRA GROUP";
-const SITE_TITLE = "LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
+const SITE_NAME = "LT GROUP";
+const SITE_TITLE = "LT GROUP — Bâtir la terre, éclairer l'avenir";
 const SITE_DESCRIPTION =
-  "LIGHT TERRA GROUP : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification en Côte d'Ivoire.";
+  "LT GROUP : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification en Côte d'Ivoire.";
 
 function NotFoundComponent() {
   return (
@@ -106,12 +106,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: configuredLogoAbsolute },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
+      { property: "og:image:alt", content: "Logo officiel LT GROUP" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
       { name: "twitter:description", content: SITE_DESCRIPTION },
       { name: "twitter:image", content: configuredLogoAbsolute },
-      { name: "twitter:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
+      { name: "twitter:image:alt", content: "Logo officiel LT GROUP" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -128,13 +128,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: ReactNode }) {
+function RootShell({ children }: { children: ReactNode }) {\n  const company = Route.useLoaderData();\n  const configuredLogo = company?.logo_png_url || company?.logo_url || LOGO_URL;
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: LOGO_URL,
+    logo: configuredLogo,
     description: SITE_DESCRIPTION,
     telephone: "+225 07 49 22 47 22",
     email: "contact@lightterragroup.com",
