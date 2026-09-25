@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LOGO_URL, SITE_URL, OG_IMAGE_URL } from "@/lib/media";
+import { companyQuery } from "@/lib/site-data";
 
 const SITE_NAME = "LIGHT TERRA GROUP";
 const SITE_TITLE = "LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
@@ -80,8 +81,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => {
-    const configuredLogo = LOGO_URL;
+  loader: async ({ context }) => {
+    try { return await context.queryClient.ensureQueryData(companyQuery); } catch { return null; }
+  },
+  head: ({ loaderData }) => {
+    const configuredLogo = loaderData?.logo_png_url || loaderData?.logo_url || LOGO_URL;
     const configuredLogoAbsolute = configuredLogo.startsWith("http") ? configuredLogo : new URL(configuredLogo, SITE_URL).toString();
     return ({
     meta: [
@@ -130,7 +134,7 @@ function RootShell({ children }: { children: ReactNode }) {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: OG_IMAGE_URL,
+    logo: LOGO_URL,
     description: SITE_DESCRIPTION,
     telephone: "+225 07 49 22 47 22",
     email: "contact@lightterragroup.com",
