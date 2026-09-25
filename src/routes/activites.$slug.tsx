@@ -7,7 +7,7 @@ import { activitiesQuery } from "@/lib/site-data";
 
 const ICONS: Record<string, typeof Building2> = { compass: Compass, hammer: Hammer, building: Building2, zap: Zap, "hard-hat": Hammer };
 export const Route = createFileRoute("/activites/$slug")({
-  head: () => ({ meta: [{ title: "Activité — LIGHT TERRA GROUP" }, { name: "description", content: "Découvrez une activité de LIGHT TERRA GROUP." }] }),
+  head: () => ({ meta: [{ title: "Activité — LT GROUP" }, { name: "description", content: "Découvrez une activité de LT GROUP." }] }),
   component: Page,
 });
 function Page() {
