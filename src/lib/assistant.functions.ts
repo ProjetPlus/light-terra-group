@@ -184,13 +184,19 @@ export const askAssistant = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Public LT GROUP Supabase configuration is pinned to production so Raï can
     // still load the company database when Vercel environment injection is stale or absent.
-    const supabaseUrl = "https://ghkijyimotuivykvwlge.supabase.co";\n    const publicKey =\n      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??\n      process.env["SUPABASE_PUBLISHABLE_KEY"] ??\n      "sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj";\n    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    const supabaseUrl = "https://ghkijyimotuivykvwlge.supabase.co";
+    const publicKey =
+      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
+      process.env["SUPABASE_PUBLISHABLE_KEY"] ??
+      "sb_publishable_DOe49CSUFAbrDJZ4P2TawA_JlECROwj";
+    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
     const supabaseKey = publicKey;
 
     const empty: SiteContext = { company: null, activities: [], knowledge: [], projects: [], news: [] };
     let ctx = empty;
 
     if (supabaseUrl && supabaseKey) {
+      try {
       const client = createClient(supabaseUrl, publicKey ?? serviceRoleKey ?? "", {
         auth: { persistSession: false, autoRefreshToken: false },
       });
@@ -208,6 +214,10 @@ export const askAssistant = createServerFn({ method: "POST" })
         projects: (projects.data ?? []) as SiteContext["projects"],
         news: (news.data ?? []) as SiteContext["news"],
       };
+      } catch (error) {
+        console.error("Assistant context error");
+        ctx = empty;
+      }
     }
 
     const latestUserMessage = [...data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
