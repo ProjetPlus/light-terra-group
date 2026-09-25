@@ -30,9 +30,9 @@ import {
   projectsQuery,
 } from "@/lib/site-data";
 
-const title = "LIGHT TERRA GROUP — Bâtir la terre, éclairer l'avenir";
+const title = "LT GROUP — Bâtir la terre, éclairer l'avenir";
 const description =
-  "LIGHT TERRA GROUP : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification à Abidjan, Côte d'Ivoire.";
+  "LT GROUP : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification à Abidjan, Côte d'Ivoire.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL },
       { property: "og:image", content: OG_IMAGE_URL },
-      { property: "og:image:alt", content: "Logo officiel LIGHT TERRA GROUP" },
+      { property: "og:image:alt", content: "Logo officiel LT GROUP" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/")({
 /** Lecture en boucle continue des séquences vidéo, sans coupure visible. */
 function IntroVideoLoop() {
   const { data: videos } = useQuery(introVideosQuery);
-  const { data: media } = useQuery(mediaItemsQuery);
+  
   const list = useMemo(
     () =>
       videos?.length
@@ -168,7 +168,7 @@ function IntroVideoLoop() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.22),transparent_35%),linear-gradient(135deg,#111,#000)]" />
         <div className="relative flex h-full items-center justify-center p-6 text-center">
           <div>
-            <p className="eyebrow text-gold">LIGHT TERRA GROUP</p>
+            <p className="eyebrow text-gold">LT GROUP</p>
             <p className="mt-3 font-display text-xl text-white sm:text-2xl">Notre savoir-faire en mouvement</p>
             <p className="mt-2 text-sm text-white/60">La vidéo de présentation sera affichée ici dès qu’elle est ajoutée depuis l’administration.</p>
           </div>
@@ -211,7 +211,7 @@ function Hero() {
         <div key={slide.id} className="absolute inset-0 transition-opacity duration-1000" style={{ opacity: i === index ? 1 : 0 }} aria-hidden={i !== index}>
           <MediaPreview
             url={slide.image_url}
-            alt={slide.title ?? "LIGHT TERRA GROUP"}
+            alt={slide.title ?? "LT GROUP"}
             className={i === index ? "h-full w-full object-cover animate-slow-zoom" : "h-full w-full object-cover"}
             autoPlay={isVideoMedia(slide.image_url) && i === index}
             loop
@@ -233,7 +233,7 @@ function Hero() {
         <div className="order-2">
           <p className="eyebrow text-gold">Bâtir la terre, éclairer l'avenir</p>
           <h1 key={index} className="animate-rise-in mt-4 text-4xl leading-tight text-ink-foreground lg:text-5xl">
-            {list[index]?.title ?? "LIGHT TERRA GROUP"}
+            {list[index]?.title ?? "LT GROUP"}
           </h1>
           {list[index]?.subtitle ? <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/80">{list[index]?.subtitle}</p> : null}
           <div className="mt-8 flex flex-wrap gap-3">
