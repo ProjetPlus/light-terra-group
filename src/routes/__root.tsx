@@ -138,14 +138,16 @@ function RootShell({ children }: { children: ReactNode }) {
     url: SITE_URL,
     logo: configuredLogo,
     description: SITE_DESCRIPTION,
-    telephone: "+225 07 49 22 47 22",
-    email: "contact@ltgroup-ci.com",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Cocody Akouédo extension sud-est, Lot 637, îlot 60",
-      addressLocality: "Abidjan",
-      addressCountry: "CI",
-    },
+    ...(company?.phone_primary ? { telephone: company.phone_primary } : {}),
+    ...(company?.email ? { email: company.email } : {}),
+    ...(company?.address || company?.city || company?.country ? {
+      address: {
+        "@type": "PostalAddress",
+        ...(company.address ? { streetAddress: company.address } : {}),
+        ...(company.city ? { addressLocality: company.city } : {}),
+        ...(company.country ? { addressCountry: company.country } : {}),
+      },
+    } : {}),
   };
 
   const websiteJsonLd = {
