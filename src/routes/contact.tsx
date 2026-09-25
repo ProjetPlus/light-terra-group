@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { WHATSAPP_NUMBERS } from "@/lib/media";
 import { submitRequest } from "@/lib/requests.functions";
 
-const title = "Contact — LIGHT TERRA GROUP";
+const title = "Contact — LT GROUP";
 const description =
-  "Contactez LIGHT TERRA GROUP à Abidjan : téléphone, WhatsApp, e-mail, adresse du siège social et formulaire de contact.";
+  "Contactez LT GROUP à Abidjan : téléphone, WhatsApp, e-mail, adresse du siège social et formulaire de contact.";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -113,7 +113,7 @@ function Page() {
 
           <div className="mt-8 overflow-hidden rounded-lg border border-border">
             <iframe
-              title="Localisation LIGHT TERRA GROUP"
+              title="Localisation LT GROUP"
               src="https://www.google.com/maps?q=Cocody%20Akou%C3%A9do%20Abidjan&output=embed"
               className="h-64 w-full"
               loading="lazy"
