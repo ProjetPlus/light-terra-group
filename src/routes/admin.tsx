@@ -137,13 +137,14 @@ const TABLES: TableDef[] = [
   {
     key: "news", label: "Actualités", table: "news",
     order: { column: "created_at", ascending: false },
-    columns: ["title", "author", "published_at", "is_published"], create: true,
+    columns: ["title", "cover_image_url", "author", "published_at", "is_published"], create: true,
     fields: [
       { name: "title", label: "Titre", kind: "text", required: true },
       { name: "slug", label: "Identifiant", kind: "text", required: true },
       { name: "excerpt", label: "Résumé", kind: "textarea" },
       { name: "content", label: "Contenu", kind: "textarea" },
       { name: "image_url", label: "Média principal (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
+      { name: "cover_image_url", label: "Photo de couverture", kind: "file", accept: "image/*" },
       { name: "author", label: "Auteur", kind: "text" },
       { name: "published_at", label: "Date de publication", kind: "text" },
       { name: "is_published", label: "Publiée", kind: "boolean" },
@@ -154,13 +155,14 @@ const TABLES: TableDef[] = [
   {
     key: "projects", label: "Projets", table: "projects",
     order: { column: "position", ascending: true },
-    columns: ["title", "category", "status", "is_published"], create: true,
+    columns: ["title", "cover_image_url", "category", "status", "is_published"], create: true,
     fields: [
       { name: "title", label: "Titre", kind: "text", required: true },
       { name: "slug", label: "Identifiant", kind: "text", required: true },
       { name: "summary", label: "Résumé", kind: "textarea" },
       { name: "content", label: "Description", kind: "textarea" },
       { name: "image_url", label: "Média principal (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
+      { name: "cover_image_url", label: "Photo de couverture", kind: "file", accept: "image/*" },
       { name: "category", label: "Pôle d'activité", kind: "select" },
       { name: "location", label: "Localisation", kind: "text" },
       { name: "status", label: "État", kind: "select", options: ["en_cours", "termine", "a_venir"] },
@@ -264,7 +266,7 @@ function AdminPage() {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
-  const [tab, setTab] = useState("messages");
+  const [tab, setTab] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: company } = useQuery(companyQuery);
 
@@ -312,6 +314,7 @@ function AdminPage() {
             <p className="mt-1 truncate text-xs text-ink-foreground/60">{email}</p>
           </div>
           <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-5">
+            <SidebarItem active={tab === "dashboard"} onClick={() => selectTab("dashboard")}>Tableau de bord</SidebarItem>
             <SidebarItem active={tab === "messages"} onClick={() => selectTab("messages")}>Demandes</SidebarItem>
             <SidebarItem active={tab === "company_info"} onClick={() => selectTab("company_info")}>Paramètres — identité & logo</SidebarItem>
             {TABLES.filter((t) => t.key !== "company_info").map((t) => <SidebarItem key={t.key} active={tab === t.key} onClick={() => selectTab(t.key)}>{t.label}</SidebarItem>)}
@@ -342,7 +345,7 @@ function AdminPage() {
         </header>
 
         <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-10">
-          {tab === "messages" ? <DashboardOverview onSelect={selectTab} /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
+          {tab === "dashboard" ? <DashboardOverview onSelect={selectTab} /> : tab === "messages" ? <MessagesPanel /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
         </main>
       </div>
     </div>
@@ -614,7 +617,8 @@ function CrudPanel({ def }: { def: TableDef }) {
       const payload: Row = {};
       for (const f of def.fields) payload[f.name] = row[f.name] ?? null;
       for (const f of def.fields) if (f.required && (payload[f.name] === null || payload[f.name] === undefined || payload[f.name] === "")) throw new Error("Le champ « " + f.label + " » est obligatoire.");
-      if ((def.table === "news" || def.table === "projects") && !payload["slug"]) payload["slug"] = slugify(String(payload["title"] ?? ""));
+      if ((def.table === "news" || def.table === "projects" || def.table === "activities") && !payload["slug"]) payload["slug"] = slugify(String(payload["title"] ?? ""));
+      if (def.table === "activities" && payload["slug"]) payload["slug"] = slugify(String(payload["slug"]));
       if (def.table === "news") { payload["author"] = "LT Group"; if (!payload["published_at"]) payload["published_at"] = todayIsoDate(); }
       if (!id && (def.table === "projects" || def.table === "partners" || def.table === "media_items" || def.table === "intro_videos")) {
         const { data: firstRow } = await supabase.from(def.table).select("position").order("position", { ascending: true }).limit(1).maybeSingle();
@@ -687,7 +691,7 @@ function CrudPanel({ def }: { def: TableDef }) {
                       toast.success("Fichier téléversé.");
                     } catch (err) { toast.error(err instanceof Error ? err.message : "Téléversement impossible."); } finally { setUploading(null); e.currentTarget.value = ""; }
                   }} />{uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}{editing[f.name] ? <p className="mt-2 truncate rounded-lg bg-slate-50 p-2 text-xs">{String(editing[f.name])}</p> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier.</p>}</div>
-                  : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects") && f.name === "title" && !editing["id"]) next["slug"] = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
+                  : <input type={f.kind === "number" ? "number" : "text"} className={field} value={String(editing[f.name] ?? "")} onChange={(e) => { const value = f.kind === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value; const next = { ...editing, [f.name]: value }; if ((def.table === "news" || def.table === "projects" || def.table === "activities") && f.name === "title" && !editing["id"]) next["slug"] = slugify(String(value ?? "")); setEditing(next); }} disabled={def.table === "news" && f.name === "author"} />}
                 </label>
               ))}
               <div className="flex gap-2 border-t pt-4 sm:col-span-2"><Button type="submit" variant="gold" disabled={save.isPending || uploading !== null}>{save.isPending ? "Enregistrement…" : "Enregistrer"}</Button><Button type="button" variant="outline" onClick={() => setEditing(null)}>Annuler</Button></div>
