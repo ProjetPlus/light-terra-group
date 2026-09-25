@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { LOGO_URL } from "@/lib/media";
 import { activitiesQuery, companyQuery, formatDateFr } from "@/lib/site-data";
 import { replyToMessage } from "@/lib/admin.functions";
+import { notifyNewsSubscribers } from "@/lib/newsletter.functions";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -43,7 +44,7 @@ type FieldDef = {
 type TableDef = {
   key: string;
   label: string;
-  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge" | "ai_visitors" | "ai_conversations" | "ai_conversation_messages";
+  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge" | "ai_visitors" | "ai_conversations" | "ai_conversation_messages" | "newsletter_subscribers" | "newsletter_deliveries";
   order: { column: string; ascending: boolean };
   columns: string[];
   fields: FieldDef[];
@@ -67,6 +68,18 @@ const AI_ADMIN_DEFS: TableDef[] = [
     key: "ai_conversation_messages", label: "Assistant — messages", table: "ai_conversation_messages",
     order: { column: "created_at", ascending: false },
     columns: ["conversation_id", "role", "content", "created_at"], create: false,
+    fields: [],
+  },
+  {
+    key: "newsletter_subscribers", label: "Newsletter — abonnés", table: "newsletter_subscribers",
+    order: { column: "created_at", ascending: false },
+    columns: ["full_name", "email", "phone", "status", "welcome_sent_at", "created_at"], create: false,
+    fields: [],
+  },
+  {
+    key: "newsletter_deliveries", label: "Newsletter — envois", table: "newsletter_deliveries",
+    order: { column: "created_at", ascending: false },
+    columns: ["subscriber_id", "news_id", "status", "sent_at", "error_message"], create: false,
     fields: [],
   },
 ];
@@ -697,6 +710,13 @@ function CrudPanel({ def }: { def: TableDef }) {
       }
       const result = id ? await supabase.from(def.table).update(payload as never).eq("id", id) : await supabase.from(def.table).insert(payload as never);
       if (result.error) throw new Error(result.error.message);
+      if (def.table === "news" && payload["is_published"] === true) {
+        const { data: session } = await supabase.auth.getSession();
+        const accessToken = session.session?.access_token;
+        if (accessToken && id) {
+          try { await notifyNewsSubscribers({ data: { accessToken, newsId: id } }); } catch (error) { console.error("Newsletter publication error", error); toast.error("Actualité enregistrée, mais l’envoi newsletter a échoué."); }
+        }
+      }
     },
     onSuccess: () => { toast.success("Enregistré."); setEditing(null); void qc.invalidateQueries({ queryKey }); void qc.invalidateQueries({ queryKey: companyQuery.queryKey }); },
     onError: (e: Error) => toast.error(e.message),
