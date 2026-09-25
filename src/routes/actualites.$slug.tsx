@@ -9,10 +9,10 @@ export const Route = createFileRoute("/actualites/$slug")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(newsItemQuery(params.slug)),
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData?.title ? `${loaderData.title} — LIGHT TERRA GROUP` : "Actualité — LIGHT TERRA GROUP" },
-      { name: "description", content: loaderData?.excerpt ?? "Actualité LIGHT TERRA GROUP." },
-      { property: "og:title", content: loaderData?.title ?? "Actualité — LIGHT TERRA GROUP" },
-      { property: "og:description", content: loaderData?.excerpt ?? "Actualité LIGHT TERRA GROUP." },
+      { title: loaderData?.title ? `${loaderData.title} — LT GROUP` : "Actualité — LT GROUP" },
+      { name: "description", content: loaderData?.excerpt ?? "Actualité LT GROUP." },
+      { property: "og:title", content: loaderData?.title ?? "Actualité — LT GROUP" },
+      { property: "og:description", content: loaderData?.excerpt ?? "Actualité LT GROUP." },
       { property: "og:image", content: loaderData?.video_poster_url ?? loaderData?.image_url ?? "/media/og-light-terra.png" },
     ],
   }),
