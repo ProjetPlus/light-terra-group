@@ -12,11 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as ActivitesRouteImport } from './routes/activites'
+import { Route as ActivitesSlugRouteImport } from './routes/activites.$slug'
 import { Route as ActualitesRouteImport } from './routes/actualites'
+import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as ProjetsRouteImport } from './routes/projets'
+import { Route as ProjetsSlugRouteImport } from './routes/projets.$slug'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TemoignagesRouteImport } from './routes/temoignages'
 
@@ -35,10 +38,20 @@ const ActivitesRoute = ActivitesRouteImport.update({
   path: '/activites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivitesSlugRoute = ActivitesSlugRouteImport.update({
+  id: '/activites/$slug',
+  path: '/$slug',
+  getParentRoute: () => ActivitesRoute,
+} as any)
 const ActualitesRoute = ActualitesRouteImport.update({
   id: '/actualites',
   path: '/actualites',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
+  id: '/actualites/$slug',
+  path: '/$slug',
+  getParentRoute: () => ActualitesRoute,
 } as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -60,6 +73,11 @@ const ProjetsRoute = ProjetsRouteImport.update({
   path: '/projets',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjetsSlugRoute = ProjetsSlugRouteImport.update({
+  id: '/projets/$slug',
+  path: '/$slug',
+  getParentRoute: () => ProjetsRoute,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -75,11 +93,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/activites': typeof ActivitesRoute
+  '/activites/$slug': typeof ActivitesSlugRoute
   '/actualites': typeof ActualitesRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
+  '/projets/$slug': typeof ProjetsSlugRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
 }
@@ -114,11 +135,14 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/activites'
+    | '/activites/$slug'
     | '/actualites'
+    | '/actualites/$slug'
     | '/admin'
     | '/contact'
     | '/me'
     | '/projets'
+    | '/projets/$slug'
     | '/services'
     | '/temoignages'
   fileRoutesByTo: FileRoutesByTo
@@ -151,11 +175,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
   ActivitesRoute: typeof ActivitesRoute
+  ActivitesSlugRoute: typeof ActivitesSlugRoute
   ActualitesRoute: typeof ActualitesRoute
+  ActualitesSlugRoute: typeof ActualitesSlugRoute
   AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
   MeRoute: typeof MeRoute
   ProjetsRoute: typeof ProjetsRoute
+  ProjetsSlugRoute: typeof ProjetsSlugRoute
   ServicesRoute: typeof ServicesRoute
   TemoignagesRoute: typeof TemoignagesRoute
 }
@@ -238,12 +265,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
-  ActivitesRoute: ActivitesRoute,
-  ActualitesRoute: ActualitesRoute,
+  ActivitesRoute: ActivitesRoute._addFileChildren({ ActivitesSlugRoute }),
+  ActualitesRoute: ActualitesRoute._addFileChildren({ ActualitesSlugRoute }),
   AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
   MeRoute: MeRoute,
-  ProjetsRoute: ProjetsRoute,
+  ProjetsRoute: ProjetsRoute._addFileChildren({ ProjetsSlugRoute }),
   ServicesRoute: ServicesRoute,
   TemoignagesRoute: TemoignagesRoute,
 }
