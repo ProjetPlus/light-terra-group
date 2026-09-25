@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function isVideoMedia(url: string | null | undefined) {
   if (!url) return false;
-  const clean = url.split("?")[0].toLowerCase();
+  const clean = (url.split("?")[0] ?? "").toLowerCase();
   return /\.(mp4|webm|mov|m4v|ogg|ogv)(?:$|#)/.test(clean);
 }
 
