@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageHero, SiteLayout } from "@/components/site/SiteLayout";
 import { Link } from "@tanstack/react-router";
 import { formatDateFr, newsListQuery } from "@/lib/site-data";
+import { MediaPreview } from "@/components/site/MediaPreview";
 
 const title = "Actualités — LIGHT TERRA GROUP";
 const description = "Les dernières actualités, chantiers et annonces de LIGHT TERRA GROUP.";
@@ -36,47 +37,37 @@ function Page() {
         ) : null}
 
         <div className="grid gap-8">
-          {list.map((item) => (
-            <Link
-              key={item.id}
-              to="/actualites/$slug"
-              params={{ slug: item.slug }}
-              className="group grid gap-6 overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated md:grid-cols-[280px_1fr]"
-            >
-              {item.image_url ? (
-                <img
-                  src={item.image_url}
-                  alt={item.title}
-                  loading="lazy"
-                  className="h-full min-h-48 w-full object-cover transition duration-500 group-hover:scale-[1.02]"
-                />
-              ) : null}
-              <div className="p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                  {formatDateFr(item.published_at ?? item.created_at)}
-                  {item.author ? ` — ${item.author}` : ""}
-                </p>
-                <h2 className="mt-3 text-2xl">{item.title}</h2>
-                <p className="mt-3 leading-relaxed text-muted-foreground">{item.excerpt}</p>
-                {item.video_url ? (
-                  <div className="mt-5 overflow-hidden rounded-xl bg-black">
-                    <video
-                      controls
-                      muted
-                      playsInline
-                      preload="metadata"
-                      poster={item.video_poster_url ?? item.image_url ?? undefined}
-                      className="aspect-video w-full object-cover"
-                    >
-                      <source src={item.video_url} type="video/mp4" />
-                    </video>
-                  </div>
+          {list.map((item) => {
+            const mediaUrl = item.image_url ?? item.video_url;
+            return (
+              <Link
+                key={item.id}
+                to="/actualites/$slug"
+                params={{ slug: item.slug }}
+                className="group grid gap-6 overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated md:grid-cols-[280px_1fr]"
+              >
+                {mediaUrl ? (
+                  <MediaPreview
+                    url={mediaUrl}
+                    alt={item.title}
+                    poster={item.video_poster_url}
+                    autoPlay={!item.video_poster_url}
+                    loop
+                    className="h-full min-h-48 w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                  />
                 ) : null}
-                <span className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">Lire l’actualité →</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="p-6">
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    {formatDateFr(item.published_at ?? item.created_at)}
+                    {item.author ? ` — ${item.author}` : ""}
+                  </p>
+                  <h2 className="mt-3 text-2xl">{item.title}</h2>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{item.excerpt}</p>
+                  <span className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">Lire l’actualité →</span>
+                </div>
+              </Link>
+            );
+          })}       </div>
       </section>
     </SiteLayout>
   );
