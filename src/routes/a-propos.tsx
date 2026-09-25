@@ -113,12 +113,17 @@ function Page() {
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
             <p className="eyebrow">Domaines d'intervention</p>
             <h2 className="mt-3 text-3xl">Ce que nous faisons</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">Nos pôles couvrent l’ensemble des étapes d’un projet, de l’identification de l’opportunité et des études jusqu’aux travaux, aux infrastructures et à la mise en valeur des actifs.</p>
             <hr className="gold-rule mt-6 w-24" />
             <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {activities.map((activity) => (
-                <li key={activity.id} className="rounded-lg border border-border bg-card p-5">
-                  <h3 className="text-base">{activity.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{activity.short_description}</p>
+                <li key={activity.id} className="overflow-hidden rounded-lg border border-border bg-card">
+                  {activity.image_url ? <img src={activity.image_url} alt={activity.title} loading="lazy" className="aspect-[16/9] w-full object-cover" /> : null}
+                  <div className="p-5">
+                    <h3 className="text-base">{activity.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{activity.short_description}</p>
+                    <a href={`/activites/${activity.slug}`} className="mt-4 inline-flex text-sm font-semibold underline underline-offset-4">Découvrir →</a>
+                  </div>
                 </li>
               ))}
             </ul>
