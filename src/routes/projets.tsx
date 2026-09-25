@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 
@@ -73,7 +73,7 @@ function Page() {
               key={project.id}
               className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated"
             >
-              {project.image_url ? <MediaPreview url={project.image_url} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
+              {project.cover_image_url || project.image_url ? <MediaPreview url={project.cover_image_url || project.image_url || ""} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
               <div className="p-6">
                 <div className="flex items-center justify-between gap-3">
                   <p className="eyebrow">{project.category ?? "Projet"}</p>
