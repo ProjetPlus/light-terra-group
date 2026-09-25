@@ -1,10 +1,9 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+# LT GROUP — Repository guidance
+
+This repository is maintained independently for LT GROUP by Inocent KOFFI.
+
+## Rules
+- Do not commit secrets, API keys, tokens, or `.env` files.
+- Keep server credentials server-side only.
+- Preserve the TanStack Start architecture and Vercel compatibility.
+- Validate security-sensitive changes against Supabase RLS and server-side authorization.
