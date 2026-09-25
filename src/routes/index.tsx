@@ -16,6 +16,7 @@ import { PartnersStrip, SiteFooter, SiteHeader } from "@/components/site/SiteLay
 import { AiAssistant } from "@/components/site/AiAssistant";
 import { MediaGallery } from "@/components/site/MediaGallery";
 import { MediaPreview, isVideoMedia } from "@/components/site/MediaPreview";
+import { NewsletterSignup } from "@/components/site/NewsletterSignup";
 import { Button } from "@/components/ui/button";
 import { OG_IMAGE_URL, SITE_URL } from "@/lib/media";
 import {
@@ -31,7 +32,7 @@ import {
 
 const title = "LT GROUP — Bâtir la terre, éclairer l'avenir";
 const description =
-  "LT GROUP : aménagement foncier, BTP & VRD, immobilier, hydraulique et électrification à Abidjan, Côte d'Ivoire.";
+  "LT GROUP : aménagement foncier, BTP & VRD, construction immobilière, hydraulique, électrification, topographie & études, avec une offre complémentaire de vente et commercialisation de terrains.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -417,6 +418,7 @@ function Index() {
         <VideoShowcase />
         <FeaturedProjects />
         <LatestNews />
+        <NewsletterSignup />
         <CallToAction />
       </main>
       <PartnersStrip />
