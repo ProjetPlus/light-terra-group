@@ -61,7 +61,7 @@ function Page() {
                   </p>
                   {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 h-40 w-full rounded-md object-cover" /> : null}
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>
