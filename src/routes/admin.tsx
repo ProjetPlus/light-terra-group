@@ -349,8 +349,8 @@ function AdminPage() {
       <aside className={"fixed inset-y-0 left-0 z-50 w-[280px] border-r border-white/10 bg-[#0b1f18] text-ink-foreground transition-transform lg:translate-x-0 " + (mobileOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex h-full flex-col shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
-            <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
-              <img src={company?.logo_jpg_url || company?.logo_png_url || company?.logo_url || LOGO_URL} alt="LT GROUP" className="h-11 w-auto max-w-[220px] object-contain" />
+            <div className="flex min-h-16 items-center rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-white/10">
+              <img src={company?.logo_jpg_url || company?.logo_png_url || company?.logo_url || LOGO_URL} alt="LT GROUP" className="h-12 w-auto max-w-[230px] object-contain" />
             </div>
             <button type="button" className="rounded-md p-2 hover:bg-white/10 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
               <X className="h-5 w-5" />
