@@ -708,13 +708,22 @@ function CrudPanel({ def }: { def: TableDef }) {
         const { data: firstRow } = await supabase.from(def.table).select("position").order("position", { ascending: true }).limit(1).maybeSingle();
         payload["position"] = firstRow?.position == null ? 0 : Number(firstRow["position"]) - 1;
       }
-      const result = id ? await supabase.from(def.table).update(payload as never).eq("id", id) : await supabase.from(def.table).insert(payload as never);
+      const result = id
+        ? await supabase.from(def.table).update(payload as never).eq("id", id).select("id").single()
+        : await supabase.from(def.table).insert(payload as never).select("id").single();
       if (result.error) throw new Error(result.error.message);
-      if (def.table === "news" && payload["is_published"] === true) {
+
+      const savedId = String((result.data as Row | null)?.["id"] ?? id ?? "");
+      if (def.table === "news" && payload["is_published"] === true && savedId) {
         const { data: session } = await supabase.auth.getSession();
         const accessToken = session.session?.access_token;
-        if (accessToken && id) {
-          try { await notifyNewsSubscribers({ data: { accessToken, newsId: id } }); } catch (error) { console.error("Newsletter publication error", error); toast.error("Actualité enregistrée, mais l’envoi newsletter a échoué."); }
+        if (accessToken) {
+          try {
+            await notifyNewsSubscribers({ data: { accessToken, newsId: savedId } });
+          } catch (error) {
+            console.error("Newsletter publication error", error);
+            toast.error("Actualité enregistrée, mais l’envoi newsletter a échoué.");
+          }
         }
       }
     },
