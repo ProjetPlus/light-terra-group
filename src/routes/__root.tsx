@@ -139,7 +139,7 @@ function RootShell({ children }: { children: ReactNode }) {
     logo: configuredLogo,
     description: SITE_DESCRIPTION,
     telephone: "+225 07 49 22 47 22",
-    email: "contact@lightterragroup.com",
+    email: "contact@ltgroup-ci.com",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Cocody Akouédo extension sud-est, Lot 637, îlot 60",
