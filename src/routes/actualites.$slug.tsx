@@ -6,14 +6,11 @@ import { formatDateFr, newsItemQuery, newsListQuery } from "@/lib/site-data";
 import { MediaPreview } from "@/components/site/MediaPreview";
 
 export const Route = createFileRoute("/actualites/$slug")({
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(newsItemQuery(params.slug)),
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
-      { title: loaderData?.title ? `${loaderData.title} — LT GROUP` : "Actualité — LT GROUP" },
-      { name: "description", content: loaderData?.excerpt ?? "Actualité LT GROUP." },
-      { property: "og:title", content: loaderData?.title ?? "Actualité — LT GROUP" },
-      { property: "og:description", content: loaderData?.excerpt ?? "Actualité LT GROUP." },
-      { property: "og:image", content: loaderData?.cover_image_url ?? loaderData?.video_poster_url ?? loaderData?.image_url ?? "/media/og-light-terra.png" },
+      { title: "Actualité — LT GROUP" },
+      { name: "description", content: "Découvrez les actualités de LT GROUP." },
+      { property: "og:image", content: "/media/og-light-terra.png" },
     ],
   }),
   component: Page,
@@ -50,7 +47,7 @@ function Page() {
           {item.author ? <span>— {item.author}</span> : null}
         </div>
 
-        {item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} className="mb-6 max-h-[520px] w-full rounded-2xl object-cover shadow-elevated" /> : null}
+        {item.cover_image_url ? <MediaPreview url={item.cover_image_url} alt={item.title + " — couverture"} className="mb-6 max-h-[520px] w-full rounded-2xl object-cover shadow-elevated" /> : null}
 
         {item.image_url || item.video_url ? (
           <MediaPreview
