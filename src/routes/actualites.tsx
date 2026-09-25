@@ -38,7 +38,7 @@ function Page() {
 
         <div className="grid gap-8">
           {list.map((item) => {
-            const mediaUrl = item.image_url ?? item.video_url;
+            const mediaUrl = item.cover_image_url ?? item.image_url ?? item.video_url;
             return (
               <Link
                 key={item.id}
