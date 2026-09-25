@@ -223,6 +223,23 @@ function safeFileName(name: string) {
   return (base || "fichier") + "-" + crypto.randomUUID() + ext;
 }
 
+async function convertPngToJpg(file: File) {
+  if (file.type !== "image/png") throw new Error("La conversion automatique nécessite un PNG.");
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Impossible de préparer le logo JPG.");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+  if (!blob) throw new Error("Impossible de générer la version JPG.");
+  return new File([blob], "logo.jpg", { type: "image/jpeg" });
+}
+
 async function uploadBrandVariant(file: File, variant: "png" | "jpg") {
   if (file.size > 10 * 1024 * 1024) throw new Error("Logo trop volumineux (10 Mo maximum).");
   const expected = variant === "png" ? "image/png" : "image/jpeg";
@@ -688,8 +705,24 @@ function CrudPanel({ def }: { def: TableDef }) {
                   : f.kind === "file" ? <div className="mt-2 rounded-xl border border-dashed border-slate-300 p-4"><input type="file" accept={f.accept ?? "image/*,video/*"} className="block w-full max-w-full text-sm" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return; setUploading(f.name);
                     try {
-                      const url = def.table === "company_info" && f.name === "logo_png_url" ? await uploadBrandVariant(file, "png") : def.table === "company_info" && f.name === "logo_jpg_url" ? await uploadBrandVariant(file, "jpg") : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
-                      setEditing((current) => current ? { ...current, [f.name]: url, ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}), ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}), ...(def.table === "news" && f.name === "video_url" ? { image_url: null } : {}), ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {}) } : current);
+                      const url = def.table === "company_info" && f.name === "logo_png_url"
+                        ? await uploadBrandVariant(file, "png")
+                        : def.table === "company_info" && f.name === "logo_jpg_url"
+                          ? await uploadBrandVariant(file, "jpg")
+                          : await uploadSiteFile(file, def.table === "news" ? "news" : def.table === "projects" ? "projects" : def.table === "partners" ? "partners" : def.table === "intro_videos" ? "intro-videos" : "media");
+                      let generatedJpgUrl: string | null = null;
+                      if (def.table === "company_info" && f.name === "logo_png_url") {
+                        generatedJpgUrl = await uploadBrandVariant(await convertPngToJpg(file), "jpg");
+                      }
+                      setEditing((current) => current ? {
+                        ...current,
+                        [f.name]: url,
+                        ...(generatedJpgUrl ? { logo_jpg_url: generatedJpgUrl } : {}),
+                        ...(def.table === "media_items" && f.name === "url" ? { kind: file.type.startsWith("video/") ? "video" : "photo" } : {}),
+                        ...(def.table === "news" && f.name === "image_url" ? { video_url: null } : {}),
+                        ...(def.table === "news" && f.name === "video_url" ? { image_url: null } : {}),
+                        ...(def.table === "company_info" && f.name === "logo_png_url" ? { logo_url: url } : {})
+                      } : current);
                       toast.success("Fichier téléversé.");
                     } catch (err) { toast.error(err instanceof Error ? err.message : "Téléversement impossible."); } finally { setUploading(null); e.currentTarget.value = ""; }
                   }} />{uploading === f.name ? <p className="mt-2 text-xs text-muted-foreground">Téléversement…</p> : null}{editing[f.name] ? <p className="mt-2 truncate rounded-lg bg-slate-50 p-2 text-xs">{String(editing[f.name])}</p> : <p className="mt-2 text-xs text-muted-foreground">Aucun fichier.</p>}</div>
