@@ -43,12 +43,27 @@ type FieldDef = {
 type TableDef = {
   key: string;
   label: string;
-  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge";
+  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge" | "ai_visitors" | "ai_conversations";
   order: { column: string; ascending: boolean };
   columns: string[];
   fields: FieldDef[];
   create: boolean;
 };
+
+const AI_ADMIN_DEFS: TableDef[] = [
+  {
+    key: "ai_visitors", label: "Assistant — visiteurs", table: "ai_visitors",
+    order: { column: "last_seen_at", ascending: false },
+    columns: ["full_name", "email", "phone", "project_type", "request_type", "last_seen_at"], create: false,
+    fields: [],
+  },
+  {
+    key: "ai_conversations", label: "Assistant — conversations", table: "ai_conversations",
+    order: { column: "last_message_at", ascending: false },
+    columns: ["visitor_id", "session_key", "intent", "status", "last_message_at"], create: false,
+    fields: [],
+  },
+];
 
 const TABLES: TableDef[] = [
   {
@@ -364,7 +379,7 @@ function AdminPage() {
             <SidebarItem active={tab === "dashboard"} onClick={() => selectTab("dashboard")}>Tableau de bord</SidebarItem>
             <SidebarItem active={tab === "messages"} onClick={() => selectTab("messages")}>Demandes</SidebarItem>
             <SidebarItem active={tab === "company_info"} onClick={() => selectTab("company_info")}>Paramètres — identité & logo</SidebarItem>
-            {TABLES.filter((t) => t.key !== "company_info").map((t) => <SidebarItem key={t.key} active={tab === t.key} onClick={() => selectTab(t.key)}>{t.label}</SidebarItem>)}
+            {[...TABLES, ...AI_ADMIN_DEFS].filter((t) => t.key !== "company_info").map((t) => <SidebarItem key={t.key} active={tab === t.key} onClick={() => selectTab(t.key)}>{t.label}</SidebarItem>)}
           </nav>
           <div className="border-t border-white/10 p-4">
             <Button variant="outline" className="w-full border-white/20 bg-transparent text-ink-foreground hover:bg-white/10" onClick={async () => { await supabase.auth.signOut(); void navigate({ to: "/me" }); }}>
@@ -385,14 +400,14 @@ function AdminPage() {
               </button>
               <div>
                 <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">LT GROUP</p>
-                <h1 className="text-lg">{tab === "dashboard" ? "Tableau de bord" : tab === "messages" ? "Demandes" : TABLES.find((t) => t.key === tab)?.label ?? "Administration"}</h1>
+                <h1 className="text-lg">{tab === "dashboard" ? "Tableau de bord" : tab === "messages" ? "Demandes" : [...TABLES, ...AI_ADMIN_DEFS].find((t) => t.key === tab)?.label ?? "Administration"}</h1>
               </div>
             </div>
           </div>
         </header>
 
         <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-10">
-          {tab === "dashboard" ? <DashboardOverview onSelect={selectTab} /> : tab === "messages" ? <MessagesPanel /> : <CrudPanel def={TABLES.find((t) => t.key === tab)!} />}
+          {tab === "dashboard" ? <DashboardOverview onSelect={selectTab} /> : tab === "messages" ? <MessagesPanel /> : <CrudPanel def={[...TABLES, ...AI_ADMIN_DEFS].find((t) => t.key === tab)!} />}
         </main>
       </div>
     </div>
@@ -465,6 +480,8 @@ function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
     ["Témoignages", "testimonials"],
     ["Partenaires", "partners"],
     ["Informations du groupe", "company_info"],
+    ["Visiteurs de Raï", "ai_visitors"],
+    ["Conversations de Raï", "ai_conversations"],
   ] as const;
   return (
     <div className="space-y-8">
