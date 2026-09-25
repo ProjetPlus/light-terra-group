@@ -29,7 +29,7 @@ function escapeHtml(value: string) {
 }
 
 function logoUrl() {
-  return env("LT_GROUP_LOGO_URL") || "https://lightterragroup.com/media/logo-light-terra.png";
+  return env("LT_GROUP_LOGO_URL") || "https://ltgroup-ci.com/media/logo-light-terra-transparent.png";
 }
 
 function fromAddress() {
@@ -113,7 +113,7 @@ export const notifyNewsSubscribers = createServerFn({ method: "POST" })
       if (deliveryError || !delivery || delivery.status === "sent") continue;
 
       try {
-        const siteUrl = env("SITE_URL") || "https://lightterragroup.com";
+        const siteUrl = env("SITE_URL") || "https://ltgroup-ci.com";
         const link = `${siteUrl}/actualites/${encodeURIComponent(news.slug)}`;
         const name = escapeHtml(subscriber.full_name);
         const title = escapeHtml(news.title);
