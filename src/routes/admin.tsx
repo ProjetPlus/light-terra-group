@@ -313,7 +313,8 @@ function AdminPage() {
           </div>
           <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-5">
             <SidebarItem active={tab === "messages"} onClick={() => selectTab("messages")}>Demandes</SidebarItem>
-            {TABLES.map((t) => <SidebarItem key={t.key} active={tab === t.key} onClick={() => selectTab(t.key)}>{t.label}</SidebarItem>)}
+            <SidebarItem active={tab === "company_info"} onClick={() => selectTab("company_info")}>Paramètres — identité & logo</SidebarItem>
+            {TABLES.filter((t) => t.key !== "company_info").map((t) => <SidebarItem key={t.key} active={tab === t.key} onClick={() => selectTab(t.key)}>{t.label}</SidebarItem>)}
           </nav>
           <div className="border-t border-white/10 p-4">
             <Button variant="outline" className="w-full border-white/20 bg-transparent text-ink-foreground hover:bg-white/10" onClick={async () => { await supabase.auth.signOut(); void navigate({ to: "/me" }); }}>
