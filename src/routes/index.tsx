@@ -171,9 +171,9 @@ function Hero() {
           </h1>
           {list[index]?.subtitle ? <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/80">{list[index]?.subtitle}</p> : null}
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</Link></Button>
+            <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</a></Button>
             <Button asChild size="lg" variant="outline" className="border-gold/50 bg-transparent text-ink-foreground hover:bg-gold hover:text-ink">
-              <Link to="/projets">Voir nos réalisations</Link>
+              <Link to="/projets">Voir nos réalisations</a>
             </Button>
           </div>
 
@@ -320,11 +320,11 @@ function Activities() {
               <h3 className="mt-5 text-xl">{activity.title}</h3>
               {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 aspect-[16/9] w-full rounded-md object-cover" /> : null}
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{activity.short_description}</p>
-            </Link>
+            </a>
           );
         })}
       </div>
-      <div className="mt-10"><Button asChild variant="outline"><Link to="/activites">Découvrir nos activités <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>
+      <div className="mt-10"><Button asChild variant="outline"><Link to="/activites">Découvrir nos activités <ArrowRight className="ml-2 h-4 w-4" /></a></Button></div>
     </section>
   );
 }
@@ -342,17 +342,17 @@ function FeaturedProjects() {
         <hr className="gold-rule mt-6 w-24" />
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {list.map((project) => (
-            <Link to="/projets/$slug" params={{ slug: project.slug }} key={project.id} className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+            <a href={"/projets/" + project.slug} key={project.id} className="overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
               {project.cover_image_url || project.image_url ? <MediaPreview url={project.cover_image_url || project.image_url || ""} alt={project.title} className="aspect-[4/3] w-full object-cover" /> : null}
               <div className="p-6">
                 <p className="eyebrow">{project.category ?? "Projet"}</p>
                 <h3 className="mt-2 text-lg">{project.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{project.summary}</p>
               </div>
-            </Link>
+            </a>
           ))}
         </div>
-        <div className="mt-10"><Button asChild variant="gold"><Link to="/projets">Tous nos projets</Link></Button></div>
+        <div className="mt-10"><Button asChild variant="gold"><Link to="/projets">Tous nos projets</a></Button></div>
       </div>
     </section>
   );
@@ -370,7 +370,7 @@ function LatestNews() {
       <hr className="gold-rule mt-6 w-24" />
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {list.map((item) => (
-          <Link key={item.id} to="/actualites/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
+          <a key={item.id} href={"/actualites/" + item.slug} className="group overflow-hidden rounded-lg border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
             {item.cover_image_url || item.image_url || item.video_url ? <MediaPreview url={item.cover_image_url ?? item.image_url ?? item.video_url ?? ""} alt={item.title} poster={item.video_poster_url} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : null}
             <div className="p-6">
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{formatDateFr(item.published_at ?? item.created_at)}</p>
@@ -378,10 +378,10 @@ function LatestNews() {
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.excerpt}</p>
               <span className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">Lire l’actualité →</span>
             </div>
-          </Link>
+          </a>
         ))}
       </div>
-      <div className="mt-10"><Button asChild variant="outline"><Link to="/actualites">Toutes les actualités</Link></Button></div>
+      <div className="mt-10"><Button asChild variant="outline"><Link to="/actualites">Toutes les actualités</a></Button></div>
     </section>
   );
 }
@@ -396,7 +396,7 @@ function CallToAction() {
           <p className="mt-4 max-w-xl text-ink-foreground/70">Nos équipes vous accompagnent de l'étude à la livraison. Décrivez votre besoin, nous revenons vers vous rapidement.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</Link></Button>
+          <Button asChild variant="gold" size="lg"><Link to="/services">Demander un devis</a></Button>
           {company?.phone_primary ? (
             <Button asChild size="lg" variant="outline" className="border-gold/50 bg-transparent text-ink-foreground hover:bg-gold hover:text-ink">
               <a href={`tel:${company.phone_primary.replace(/\s/g, "")}`}>{company.phone_primary}</a>
