@@ -1,5 +1,5 @@
 // Médias de marque servis directement avec le site.
-export const SITE_URL = "https://lightterragroup.com";
+export const SITE_URL = "https://ltgroup-ci.com";
 export const LOGO_URL = "/media/logo-light-terra-transparent.png";
 export const FAVICON_URL = "/media/favicon-light-terra.png";
 export const OG_IMAGE_URL = `${SITE_URL}/media/og-light-terra.png`;
