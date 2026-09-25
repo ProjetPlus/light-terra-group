@@ -107,11 +107,10 @@ export function PartnersStrip() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
           {partners.map((partner) => {
             const inner = partner.logo_url ? (
-              <img
-                src={partner.logo_url}
+              <MediaPreview
+                url={partner.logo_url}
                 alt={partner.name}
-                loading="lazy"
-                className="h-12 w-auto opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
+                className="h-12 w-auto object-contain opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
               />
             ) : (
               <span className="font-display text-lg text-muted-foreground">{partner.name}</span>
