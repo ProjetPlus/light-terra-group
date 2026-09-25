@@ -146,7 +146,7 @@ const TABLES: TableDef[] = [
       { name: "author", label: "Auteur", kind: "text" },
       { name: "published_at", label: "Date de publication", kind: "text" },
       { name: "is_published", label: "Publiée", kind: "boolean" },
-      { name: "video_url", label: "Vidéo de l’actualité", kind: "file", accept: "video/mp4,video/webm,video/quicktime" },
+      { name: "video_url", label: "Média secondaire (photo ou vidéo)", kind: "file", accept: "image/*,video/*" },
       { name: "video_poster_url", label: "Affiche de la vidéo", kind: "file", accept: "image/*" },
     ],
   },
