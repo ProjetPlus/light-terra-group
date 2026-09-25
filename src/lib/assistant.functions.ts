@@ -236,8 +236,6 @@ ACTUALITÉS:
 ${ctx.news.map((n) => "- " + n.title + (n.excerpt ? ": " + n.excerpt : "")).join("\\n")}`;
 
     const openAiKey = process.env["OPENAI_API_KEY"];
-    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
-    const publicKey = process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
 
     try {
       if (openAiKey) {
