@@ -23,11 +23,18 @@ type SiteContext = {
 };
 
 function extractVisitorData(messages: Array<{ role: string; content: string }>) {
-  const text = messages.filter((m) => m.role === "user").map((m) => m.content).join("\n");
+  const userMessages = messages.filter((m) => m.role === "user").map((m) => m.content);
+  const text = userMessages.join("\n");
   const normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
   const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] ?? null;
   const phone = text.match(/(?:\+225\s*)?(?:0\d|[257]\d)(?:[\s.-]?\d{2}){4}/)?.[0] ?? null;
-  const full_name = text.match(/(?:je m'appelle|je suis|mon nom est|moi c'est)\s+([A-Za-zÀ-ÿ' -]{2,60})/i)?.[1]?.trim() ?? null;
+
+  const nameMatch =
+    text.match(/(?:je m'appelle|mon nom est|moi c'est|moi, c'est)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*(?:\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*){0,3})(?=\s*(?:[,.!?;]|$))/i) ??
+    text.match(/\bnom\s*:\s*([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*(?:\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*){0,3})(?=\s*(?:[,.!?;]|$))/i);
+  const full_name = nameMatch?.[1]?.trim() ?? null;
+
   let project_type: string | null = null;
   if (/terrain|foncier|lotissement|parcelle/.test(normalized)) project_type = "Foncier / terrain";
   else if (/btp|voirie|vrd|route|chantier/.test(normalized)) project_type = "BTP & VRD";
@@ -35,12 +42,32 @@ function extractVisitorData(messages: Array<{ role: string; content: string }>) 
   else if (/eau|hydraulique|adduction/.test(normalized)) project_type = "Hydraulique";
   else if (/electricite|electrification|reseau electrique/.test(normalized)) project_type = "Électrification";
   else if (/topographie|geometre|releve|etude/.test(normalized)) project_type = "Topographie & études";
+
   let request_type: string | null = null;
-  if (/devis|prix|cout|tarif|budget/.test(normalized)) request_type = "Demande de devis";
-  else if (/acheter|achat|vente|vendre|terrain/.test(normalized)) request_type = "Foncier / commercialisation";
+  if (/devis|prix|cout|tarif|budget|estimation/.test(normalized)) request_type = "Demande de devis";
+  else if (/acheter|achat|vente|vendre|terrain|commercialiser/.test(normalized)) request_type = "Foncier / commercialisation";
   else if (/partenariat|partenaire|collaboration/.test(normalized)) request_type = "Partenariat";
+  else if (/contact|recontacter|rappeler|joindre/.test(normalized)) request_type = "Prise de contact";
   else if (/information|renseignement|question/.test(normalized)) request_type = "Information";
-  return { full_name, email, phone, project_type, request_type };
+
+  const consent_contact =
+    /(?:oui|d'accord|accord|vous pouvez|je veux bien|contactez[- ]?moi|recontactez[- ]?moi|appelez[- ]?moi|rappelez[- ]?moi)/i.test(
+      userMessages.slice(-2).join(" "),
+    ) && /contact|recontact|rappel|appelez|appelez-moi|coordonn/i.test(normalized);
+
+  const budgetMatch = text.match(/(?:budget|enveloppe|montant)\s*(?:de|:)?\s*([^,.!?;\n]{2,80})/i);
+  const desiredDateMatch = text.match(/(?:d[eé]lai|[eé]ch[eé]ance|date|quand|pour)\s*(?:souhaitez[- ]?vous|:)?\s*([^,.!?;\n]{2,60})/i);
+
+  return {
+    full_name,
+    email,
+    phone,
+    project_type,
+    request_type,
+    consent_contact,
+    budget_range: budgetMatch?.[1]?.trim() ?? null,
+    desired_date: desiredDateMatch?.[1]?.trim() ?? null,
+  };
 }
 
 async function persistConversation(
@@ -61,6 +88,9 @@ async function persistConversation(
     phone: visitor.phone ?? existing?.phone ?? null,
     project_type: visitor.project_type ?? existing?.project_type ?? null,
     request_type: visitor.request_type ?? existing?.request_type ?? null,
+    budget_range: visitor.budget_range ?? existing?.budget_range ?? null,
+    desired_date: visitor.desired_date ?? existing?.desired_date ?? null,
+    consent_contact: visitor.consent_contact || Boolean(existing?.consent_contact),
     last_seen_at: new Date().toISOString(),
     source: "website_assistant",
   }, { onConflict: "visitor_key" }).select("id").single();
@@ -154,7 +184,9 @@ export const askAssistant = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const supabaseUrl = process.env["VITE_SUPABASE_URL"] ?? process.env["SUPABASE_URL"];
     const supabaseKey =
-      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
+      process.env["SUPABASE_SERVICE_ROLE_KEY"] ??
+      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
+      process.env["SUPABASE_PUBLISHABLE_KEY"];
 
     const empty: SiteContext = { company: null, activities: [], knowledge: [], projects: [], news: [] };
     let ctx = empty;
