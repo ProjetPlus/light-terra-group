@@ -69,6 +69,7 @@ export type Project = {
   summary: string | null;
   content: string | null;
   image_url: string | null;
+  cover_image_url: string | null;
   category: string | null;
   location: string | null;
   status: string;
@@ -84,6 +85,7 @@ export type NewsItem = {
   excerpt: string | null;
   content: string | null;
   image_url: string | null;
+  cover_image_url: string | null;
   author: string | null;
   published_at: string | null;
   is_published: boolean;
