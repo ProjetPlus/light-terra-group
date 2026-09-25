@@ -44,9 +44,8 @@ function Page() {
           {(activities ?? []).map((activity, i) => {
             const Icon = ICONS[activity.icon ?? ""] ?? Building2;
             return (
-              <Link
-                to="/activites/$slug"
-                params={{ slug: activity.slug }}
+              <a
+                href={`/activites/${activity.slug}`}
                 key={activity.id}
                 className="grid gap-6 rounded-lg border border-border bg-card p-6 lg:grid-cols-[auto_1fr] lg:p-8"
               >
@@ -61,7 +60,7 @@ function Page() {
                   </p>
                   {activity.image_url ? <MediaPreview url={activity.image_url} alt={activity.title} className="mt-5 h-40 w-full rounded-md object-cover" /> : null}
                 </div>
-              </Link>
+              </a>
             );
           })}
         </div>
