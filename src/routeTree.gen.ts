@@ -108,11 +108,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/activites': typeof ActivitesRoute
+  '/activites/$slug': typeof ActivitesSlugRoute
   '/actualites': typeof ActualitesRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/me': typeof MeRoute
   '/projets': typeof ProjetsRoute
+  '/projets/$slug': typeof ProjetsSlugRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
 }
@@ -210,12 +213,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActivitesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activites/$slug': {
+      id: '/activites/$slug'
+      path: '/$slug'
+      fullPath: '/activites/$slug'
+      preLoaderRoute: typeof ActivitesSlugRouteImport
+      parentRoute: typeof ActivitesRoute
+    }
     '/actualites': {
       id: '/actualites'
       path: '/actualites'
       fullPath: '/actualites'
       preLoaderRoute: typeof ActualitesRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/actualites/$slug': {
+      id: '/actualites/$slug'
+      path: '/$slug'
+      fullPath: '/actualites/$slug'
+      preLoaderRoute: typeof ActualitesSlugRouteImport
+      parentRoute: typeof ActualitesRoute
     }
     '/admin': {
       id: '/admin'
@@ -244,6 +261,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/projets'
       preLoaderRoute: typeof ProjetsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/projets/$slug': {
+      id: '/projets/$slug'
+      path: '/$slug'
+      fullPath: '/projets/$slug'
+      preLoaderRoute: typeof ProjetsSlugRouteImport
+      parentRoute: typeof ProjetsRoute
     }
     '/services': {
       id: '/services'
