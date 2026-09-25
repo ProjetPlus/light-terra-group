@@ -57,9 +57,9 @@ export const replyToMessage = createServerFn({ method: "POST" })
         body: JSON.stringify({
           from,
           to: [msg.email],
-          reply_to: "contact@lightterragroup.com",
+          reply_to: "contact@ltgroup-ci.com",
           subject: `Réponse à votre demande — ${msg.subject ?? "LIGHT TERRA GROUP"}`,
-          text: `Bonjour ${msg.full_name},\n\n${data.reply}\n\n--\nLIGHT TERRA GROUP\nBÂTIR LA TERRE, ÉCLAIRER L'AVENIR\ncontact@lightterragroup.com`,
+          text: `Bonjour ${msg.full_name},\n\n${data.reply}\n\n--\nLIGHT TERRA GROUP\nBÂTIR LA TERRE, ÉCLAIRER L'AVENIR\ncontact@ltgroup-ci.com`,
         }),
       });
       if (!res.ok) {
