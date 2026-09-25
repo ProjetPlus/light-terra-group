@@ -43,7 +43,7 @@ type FieldDef = {
 type TableDef = {
   key: string;
   label: string;
-  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge" | "ai_visitors" | "ai_conversations";
+  table: "hero_slides" | "activities" | "news" | "projects" | "testimonials" | "partners" | "media_items" | "intro_videos" | "company_info" | "ai_knowledge" | "ai_visitors" | "ai_conversations" | "ai_conversation_messages";
   order: { column: string; ascending: boolean };
   columns: string[];
   fields: FieldDef[];
@@ -61,6 +61,12 @@ const AI_ADMIN_DEFS: TableDef[] = [
     key: "ai_conversations", label: "Assistant — conversations", table: "ai_conversations",
     order: { column: "last_message_at", ascending: false },
     columns: ["visitor_id", "session_key", "intent", "status", "last_message_at"], create: false,
+    fields: [],
+  },
+  {
+    key: "ai_conversation_messages", label: "Assistant — messages", table: "ai_conversation_messages",
+    order: { column: "created_at", ascending: false },
+    columns: ["conversation_id", "role", "content", "created_at"], create: false,
     fields: [],
   },
 ];
@@ -482,6 +488,7 @@ function DashboardOverview({ onSelect }: { onSelect: (key: string) => void }) {
     ["Informations du groupe", "company_info"],
     ["Visiteurs de Raï", "ai_visitors"],
     ["Conversations de Raï", "ai_conversations"],
+    ["Messages de Raï", "ai_conversation_messages"],
   ] as const;
   return (
     <div className="space-y-8">
